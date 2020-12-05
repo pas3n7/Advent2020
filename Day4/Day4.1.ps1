@@ -3,7 +3,7 @@ $batchfile = Get-Content -Path ".\Day4\input.txt" -Raw
 $batchfile = $batchfile -split "\n\n"
 $numvalid = 0
 
-#this script assumes none of them ever repeat
+#this script assumes no passports have duplicate fields
 foreach ($i in $batchfile)
 {
 	#split by either a newline or a space
