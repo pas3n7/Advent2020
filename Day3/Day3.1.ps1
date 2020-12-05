@@ -23,4 +23,6 @@ while (($position[1] + $slopedown) -le $numlines  )
 	$position[0] = ($position[0] + $sloperight) % $width
 	$position[1] += $slopedown
 }
+
+
 Write-Output $numtrees
