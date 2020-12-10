@@ -26,6 +26,7 @@ with open(r'.\Day8\input.txt') as thefile:
 currentop = 0
 accum = 0
 ReachedLoop = False
+# numjumps = 0 
 
 while ReachedLoop is False:
 	thisop = thecode[currentop]
@@ -34,7 +35,11 @@ while ReachedLoop is False:
 		accum += thisop.value
 	#print(str(currentop) + " " +  + " " + str(i.value) + " points to:" + str(i.pointsto) + ", Current accum" + str(accum))
 	#need to check if this is the last step before we run again
+	# if (thisop.type == 'jmp'):
+	# 	print(currentop)
+	# 	numjumps += 1
 	ReachedLoop = thecode[thisop.pointsto].visited
 	currentop = thisop.pointsto
-	
+
+#print("num jumps: " + str(numjumps))	
 print(accum)
