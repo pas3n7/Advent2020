@@ -28,11 +28,13 @@ accum = 0
 ReachedLoop = False
 
 while ReachedLoop is False:
-	ReachedLoop = thecode[currentop].visited
+	thisop = thecode[currentop]
 	thecode[currentop].visited = True
-	if (thecode[currentop].type == "acc"):
-		accum += thecode[currentop].value
-
-	currentop = thecode[currentop].pointsto
-
+	if (thisop.type == "acc"):
+		accum += thisop.value
+	#print(str(currentop) + " " +  + " " + str(i.value) + " points to:" + str(i.pointsto) + ", Current accum" + str(accum))
+	#need to check if this is the last step before we run again
+	ReachedLoop = thecode[thisop.pointsto].visited
+	currentop = thisop.pointsto
+	
 print(accum)
