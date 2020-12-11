@@ -17,26 +17,38 @@ class operation:
 		self.visited = False
 
 def traversefrom(inputcode, startindex, codelength):
+
 	thisop = inputcode[startindex]
 	currentindex = startindex
 	accum = 0
 	ReachedLoop = False
+	ReachedEnd = False
 	Gotoend = False
-	while ReachedLoop is False and currentindex < codelength:
-		print(ReachedLoop)
+	while ReachedLoop is False and ReachedEnd is False:
+	
 		thisop = inputcode[currentindex]
-		nextindex = thisop.pointsto
+		inputcode[currentindex].visited = True
+		nextindex = thisop.pointsto #assigning to a variable so we can ignore a jump if we want
+
+		#need to check if we are at the end, checking [nextindex] will fail if it doesn't exist
+		if (nextindex == codelength):
+			ReachedEnd = True
+		else:
+			ReachedLoop = inputcode[nextindex].visited
+			#if we reached the end, we don't need to set this
+
+		
 		if (thisop.type == "acc"):
 			accum += thisop.value
-		elif (thisop.type == "jmp" and Gotoend is False):
+		elif (thisop.type == "jmp" and Gotoend is False and ReachedEnd is False):
 			#traverse from the current index if we encounter a jump. Follow the jump. If that returns a good value, it found the path to the end. If not, it means we 
-			#eliminate this jmp operation and go to the end, because this is the one. 
-			tempaccum = traversefrom(inputcode, currentindex, codelength)
+			# skip this jmp operation and go to the end, because this is the one. 
+			tempaccum = traversefrom(inputcode, nextindex, codelength)
 			if tempaccum is not False:
 				#this means we got the value in a deeper recursion
 				#add its result to whatever we got and break
 				accum += tempaccum
-				break
+				ReachedEnd = True
 			else:
 				#didn't find it in a deeper recursion. skip and go to end
 				Gotoend = True
@@ -48,9 +60,9 @@ def traversefrom(inputcode, startindex, codelength):
 		# if (thisop.type == 'jmp'):
 		# 	print(currentindex)
 		# 	numjumps += 1
-		ReachedLoop = thisop.visited
-		inputcode[currentindex].visited = True
+		
 		currentindex = nextindex
+
 	if ReachedLoop == True:
 		accum = False
 	return accum
