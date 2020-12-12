@@ -11,7 +11,6 @@ class sumlist:
 			if index == 0: #first in data has nothing to add to, will error at index-1
 				continue 
 			for i in range(max(index - 25, 0), index): #don't need index-1 because range isn't inclusive of the 2nd value
-				#print("first looper ", d, " second looper", self.data[i], " index of first: ", index, " index of second ", i)
 				summant = self.data[i]
 				self.sums.append(d + summant)
 		self.sums = set(self.sums)
