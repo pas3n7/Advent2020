@@ -16,5 +16,3 @@ for i in adapters:
 
 counts = Counter(differences)
 print(counts[1]*(counts[3]))
-print(zip(adapters, differences))
-print(Counter(differences))
