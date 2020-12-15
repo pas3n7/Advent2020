@@ -13,7 +13,8 @@ class waitingroom:
 
 	def coordstoindex(self, coords):
 		#pass in coordinates in an (x, y) tuple
-		return abs((coords[1]*self.rowwidth))+coords[0]
+		returncoords = coords[0] + abs((coords[1]*self.rowwidth))
+		return returncoords
 
 	def getbyindexvector(self, index, vector):
 		#vector is a tuple
@@ -25,7 +26,7 @@ class waitingroom:
 			return None
 
 	def coordisvalid(self, coord):
-		if coord[0] >= 0 and coord[0] < self.rowwidth and coord[1] >= 0 and coord[1] < self.numrows:
+		if coord[0] >= 0 and coord[0] < self.rowwidth and coord[1] <= 0 and coord[1] > -self.numrows:
 			return True
 		else:
 			return False
@@ -63,7 +64,8 @@ class waitingroom:
 		directions = [0, 45, 90, 135, 180 ,225, 270, 315]
 		numoccupied = 0
 		for i in directions:
-			if self.searchdirection(index, i) == True:
+			thisdirection = self.searchdirection(index, i)
+			if thisdirection == True:
 				numoccupied += 1
 		return numoccupied
 
@@ -109,14 +111,14 @@ class waitingroom:
 	def runtostable(self):
 		generation = 0
 		Changesmade = True
-		self.printseats(10)
+#		self.printseats(10)
 		
 		while (Changesmade == True):
-			Changesmade == self.rungeneration()
+			Changesmade = self.rungeneration()
 			generation += 1
-			self.printseats(10)
-			if generation > 10:
-				break
+			#self.printseats(10)
+			#print(self.countoccupied(11))
+			print(generation, end="\r")
 		return Changesmade
 
 		#should be false if it converges to a stable solution
@@ -133,7 +135,7 @@ class waitingroom:
 
 
 
-with open(r'.\Day11\sampleinput.txt') as thefile:
+with open(r'.\Day11\input.txt') as thefile:
     seats = thefile.read().strip()
 
 rowwidth = seats.find("\n")
@@ -143,3 +145,4 @@ theroom = waitingroom(seats, rowwidth)
 
 theroom.runtostable()
 print(theroom.totaloccupied())
+
