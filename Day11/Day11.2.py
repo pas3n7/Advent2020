@@ -4,6 +4,7 @@ class waitingroom:
 		self.rowwidth = rowwidth
 		self.arealen = len(self.seatdata)
 		self.numrows = self.arealen / self.rowwidth
+		self.tempdata = None
 
 	def indextocoords(self, index):
 		x = index % self.rowwidth
@@ -54,6 +55,8 @@ class waitingroom:
 			return False
 		elif targetval == floortile:
 			return self.searchdirection(index, direction, scaler+1)
+		else:
+			print("error, target not recognized")
 
 	def countoccupied(self, index):
 		#given an index, returns how many in line of sight are occupied
@@ -61,8 +64,9 @@ class waitingroom:
 		numoccupied = 0
 		for i in directions:
 			if self.searchdirection(index, i) == True:
-				numoccupied += 0
+				numoccupied += 1
 		return numoccupied
+
 	def printseats(self, numlines):
 		toprint = ""
 		for i in range(numlines):
@@ -70,16 +74,17 @@ class waitingroom:
 			stopindex = ((self.rowwidth * (i+1)))
 			toprint += "\n" + "".join(self.seatdata[startindex:stopindex]) #range [:] is not inclusive
 		print(toprint, end='\r') 
+		print("\n")
 
 	def rungeneration(self):
 		#return True if there was a change, false if there was no change
 		occupiedseat = "#"
 		vacantseat = "L"
 		floortile = "."
-		tempseats = self.seatdata.copy()
+		self.settemp() ###set temp data = real data
 		changemade = False
 
-		for index, s in enumerate(tempseats):
+		for index, s in enumerate(self.seatdata):
 
 			## if it's floor, move on
 			if (s == floortile):
@@ -88,17 +93,38 @@ class waitingroom:
 				numoccupied = self.countoccupied(index)
 				if(s == occupiedseat and numoccupied >= 5):
 					##occupied and >= 5 visible occupied seats, so vacate
-					self.seatdata[index] = vacantseat
+					self.tempdata[index] = vacantseat
 					changemade = True
 				elif(s == vacantseat and numoccupied == 0):
 					##vacant and nobody visible adjacent, occupy it
-					self.seatdata[index] = occupiedseat
+					self.tempdata[index] = occupiedseat
 					changemade = True
+		self.setdataeqtemp()
+			
 		return changemade
 
 	def totaloccupied(self):
 		return self.seatdata.count("#")
 
+	def runtostable(self):
+		generation = 0
+		Changesmade = True
+		self.printseats(10)
+		
+		while (Changesmade == True):
+			Changesmade == self.rungeneration()
+			generation += 1
+			self.printseats(10)
+			if generation > 10:
+				break
+		return Changesmade
+
+		#should be false if it converges to a stable solution
+
+	def settemp(self):
+		self.tempdata = self.seatdata.copy()
+	def setdataeqtemp(self):
+		self.seatdata = self.tempdata
 
 
 
@@ -106,7 +132,8 @@ class waitingroom:
 
 
 
-with open(r'.\Day11\input.txt') as thefile:
+
+with open(r'.\Day11\sampleinput.txt') as thefile:
     seats = thefile.read().strip()
 
 rowwidth = seats.find("\n")
@@ -114,4 +141,5 @@ seats = list(seats.replace("\n", ""))
 
 theroom = waitingroom(seats, rowwidth)
 
-
+theroom.runtostable()
+print(theroom.totaloccupied())
