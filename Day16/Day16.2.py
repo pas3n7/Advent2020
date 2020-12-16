@@ -56,46 +56,40 @@ class ruleset:
 		
 
 def tsettofieldvalueset(ticketdata):
+	#transform the list of tickets to a list of fields for a given position in the input data
 	tempset = [[field[i] for field in ticketdata] for i in range(NUM_TICKET_ENTIRES)]
 	tempset = list(map(lambda x: sorted(list(set(x))), tempset))
 	return tempset
+
+def elimination(fieldlist):
+	#perform process of elimination on a list containing list of possible fields for each index
+	#return a list in the same order 
+	#orderdict so we can work from the entry which can only be one thing, etc, without sorting and losing track of indexing
+	orderdict = {len(fields) : index for index, fields in enumerate(fieldlist)}
+	
+	taken = []
+	for i in range(1, NUM_TICKET_ENTIRES): #start at 1 because len
+		thisfieldname = fieldlist[orderdict.pop(i)][0]
+		taken.append(thisfieldname)
+		for x in orderdict.values():
+			fieldlist[x].remove(thisfieldname)
+	return fieldlist
+
 		
-
+#create a ruleset based on the file input
 myruleset = ruleset(ruledata)
+#remove invalid tickets if they have any fields that cannot match any rules
 nearbytickets = myruleset.removeinvalid(nearbytickets)
-
-ruleindex = {}
-
+#transform frome list of ticket to list of data for a given position in the input data
 fieldvals = tsettofieldvalueset(nearbytickets)
-
+#see which rules could possibly match data from each position
 fieldindexmatches = [myruleset.matchrule(field) for field in fieldvals]
+#perform process of elimination to get the field names in the order the appear
+fieldnames = elimination(fieldindexmatches)
 
-
-unsortedorder = { len(fields) -1 : index for index, fields in enumerate(fieldindexmatches)}
-#to translate back after sorting: unsortedorder[index]
-
-
-fieldindexmatches.sort(key=len)
-
-taken = []
-i = 0
-while i < NUM_TICKET_ENTIRES:
-	fieldindexmatches[i] = [match for match in fieldindexmatches[i] if match not in taken]
-	taken.append(fieldindexmatches[i][0])
-	i += 1
-####ooooh boy this is getting ugly, but it's REAL late
-
-fieldnamesinorder = []
-i=0
-while i < NUM_TICKET_ENTIRES:
-	fieldnamesinorder.append(fieldindexmatches[unsortedorder[i]])
-	i+=1
-
-#print(fieldindexmatches)
-print(fieldnamesinorder)
 
 product = 1
-for index, field in enumerate(fieldnamesinorder):
+for index, field in enumerate(fieldnames):
 	if field[0][0:9] == "departure":
 		print(index)
 		print(myticket[index])
