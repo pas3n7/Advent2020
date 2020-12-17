@@ -49,7 +49,7 @@ class threedgol:
 		return active
 
 	def rungeneration(self, gens= 1):
-		for gen in range(gens):
+		for _ in range(gens):
 			tempspace = deepcopy(self.space)
 			activesym = '#'
 			inactivesym = '.'
@@ -74,8 +74,19 @@ class threedgol:
 			self.space = tempspace
 			if markedforexpand:
 				self.expand(1)
+
 	def getcenterslice(self):
 		return self.space[self.centersliceref]
+
+	def printall(self):
+		for z in range(self.dimensionz):
+			for x in self.space[z]:
+				print(x)
+			print('\n')
+	
+	def printcenter(self):
+		for row in self.getcenterslice():
+			print(row)
 
 
 
@@ -87,10 +98,7 @@ with open(FILENAME) as thefile:
 myspace = threedgol(rawdata)
 
 myspace.rungeneration(1)
-for z in range(myspace.dimensionz):
-	for x in myspace.space[z]:
-		print(x)
-	print('\n')
+myspace.printcenter()
 print(myspace.countactive())
 
 
