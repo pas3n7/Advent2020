@@ -64,12 +64,12 @@ class threedgol:
 						if self.space[z][y][x] == activesym and self.countactivenei((z, y, x)) not in [2, 3]:
 							tempspace[z][y][x] = inactivesym
 							madechange = True
-						elif self.space[z][y][x] == inactivesym and self.countactivenei((z, y, x)) not in [3]:
+						elif self.space[z][y][x] == inactivesym and self.countactivenei((z, y, x)) in [3]:
 							tempspace[z][y][x] = activesym
 							madechange = True
 
 						if madechange:
-							if x in [1, self.dimension - 2] or y in [1, self.dimension - 2] or z in [self.centersliceref -1, self.centersliceref + 1]:
+							if x in [1, self.dimension - 1] or y in [1, self.dimension - 1] or z in [1, self.dimensionz - 1]:
 								markedforexpand = True
 			self.space = tempspace
 			if markedforexpand:
@@ -97,8 +97,10 @@ with open(FILENAME) as thefile:
 
 myspace = threedgol(rawdata)
 
-myspace.rungeneration(1)
-myspace.printcenter()
+myspace.rungeneration(6)
+myspace.printall()
+
+
 print(myspace.countactive())
 
 
