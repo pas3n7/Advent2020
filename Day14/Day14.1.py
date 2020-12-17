@@ -38,11 +38,12 @@ class instructiongroup:
         self.numinstr = len(self.instrlist)
     
     def execute(self):
-        #returns a list of tuples, memory address and 
+        #returns a list of tuples. memory address , data
+        tempmems = [(add, self.mask & (self.maskmask | ((~self.maskmask)&)) ) for add, data in self.instrlist]
+
 
 
 def readdata():
-
     with open(r'.\Day14\input.txt') as thefile:
         rawinput = thefile.read().strip()
 
