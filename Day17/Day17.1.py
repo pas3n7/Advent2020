@@ -1,4 +1,4 @@
-FILENAME = r".\Day17\testinput.txt"
+FILENAME = r".\Day17\input.txt"
 from copy import deepcopy
 
 class threedgol:
@@ -31,6 +31,7 @@ class threedgol:
 					i.insert(0, '.')
 					i.append('.')
 			self.dimension += 2
+		return None
 
 	def countactivenei(self, dimension):
 		#pass in dimension as a tuple (z, y, x)
@@ -69,9 +70,9 @@ class threedgol:
 							madechange = True
 
 						if madechange:
-							if x in [1, self.dimension - 1] or y in [1, self.dimension - 1] or z in [1, self.dimensionz - 1]:
+							if markedforexpand == False and (x in [1, self.dimension - 1] or y in [1, self.dimension - 1] or z in [1, self.dimensionz - 1]):
 								markedforexpand = True
-			self.space = tempspace
+			self.space = deepcopy(tempspace)
 			if markedforexpand:
 				self.expand(1)
 
@@ -103,7 +104,10 @@ myspace.printall()
 
 print(myspace.countactive())
 
-
+print("measuredlen")
+print(len(myspace.space))
+print("dimension var")
+print(myspace.dimension)
 
 
 # for x in myspace.getcenterslice():
