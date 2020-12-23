@@ -1,4 +1,4 @@
-FILENAME = r".\Day17\testinput.txt"
+FILENAME = r".\Day17\input.txt"
 from copy import deepcopy
 
 class threedgol:
@@ -31,7 +31,6 @@ class threedgol:
 				cube.insert(0, [[ '.' for i in range(dimension) ] for j in range(dimension)])
 				cube.append([[ '.' for i in range(dimension) ] for j in range(dimension)])
 				self.centersliceref += 1
-				self.dimensionz += 2
 				for zslice in cube:
 					#expand in y
 					zslice.insert(0, ['.' for i in range(dimension)])
@@ -40,6 +39,7 @@ class threedgol:
 					for i in zslice:
 						i.insert(0, '.')
 						i.append('.')
+			self.dimensionz += 2
 			self.dimension += 2
 		return None
 
