@@ -45,7 +45,18 @@ class ruleset:
 					self.ruleset.append([matchnum, matchlet])
 				except:
 					print("Failed to parse: " + line)
-		
+	def ruletoregex(self, ruleindex):
+		##let's take a rule in the format: [3, ['a', 'b'], ['b', 'a']] and make it a regex string
+		rule = self.ruleset[ruleindex]
+		try: 
+			if rule[2][0]:
+				string = '(' + ''.join(rule[1]) + '|' + ''.join(rule[2]) + ')'
+			else:
+				string = '(' + ''.join(rule[1]) + ')'
+		except: 
+			string = None
+			print("ruletoregex failed on ruleindex: " + str(ruleindex) + " : " + str(rule))
+		return string
 
 
 myruleset = ruleset(rawdata[0])
@@ -55,3 +66,4 @@ for rule in myruleset.ruleset:
 
 print(myruleset.revref)
 print(myruleset.numrules)
+print(myruleset.ruletoregex(-1))
