@@ -12,6 +12,7 @@ class ruleset:
 		self.rulesetraw = rulesetraw.split('\n')
 		self.numrules = len(self.rulesetraw)
 		self.revref = [set() for _ in range(self.numrules)] ##we will be able to look up all references to a particular index in ruleset. will init in readindata
+		self.letterindex = [] #useful to know where the letters are
 		
 		#init ruleset
 		self.ruleset = []
@@ -26,6 +27,7 @@ class ruleset:
 		for line in rulesetraw:
 			match = re.match(refregp, line)
 			if match:
+				#matched the first regex, so we're looking at a rule with only reference (not a letter rule)
 				matchnum = int(match.group(1))
 				matchset1 = [int(x) for x in match.group(2).strip().split(' ')]
 				for n in matchset1:
@@ -38,21 +40,27 @@ class ruleset:
 					matchset2 = None
 				self.ruleset.append([matchnum, matchset1, matchset2])
 			else:
+				#didn't match the firt regex, here are our letters
 				match = re.match(letregp, line)
 				try:
 					matchnum = int(match.group(1))
 					matchlet = match.group(2)
 					self.ruleset.append([matchnum, matchlet])
+					self.letterindex.append(matchnum)
 				except:
 					print("Failed to parse: " + line)
 	def ruletoregex(self, ruleindex):
 		##let's take a rule in the format: [3, ['a', 'b'], ['b', 'a']] and make it a regex string
 		rule = self.ruleset[ruleindex]
 		try: 
-			if rule[2][0]:
-				string = '(' + ''.join(rule[1]) + '|' + ''.join(rule[2]) + ')'
-			else:
-				string = '(' + ''.join(rule[1]) + ')'
+			if ruleindex not in self.letterindex:
+				if rule[2][0]:
+					string = '(' + ''.join(rule[1]) + '|' + ''.join(rule[2]) + ')'
+				else:
+					string = '(' + ''.join(rule[1]) + ')'
+			else: 
+				#letter rule, just return the letter
+				string = rule[1]
 		except: 
 			string = None
 			print("ruletoregex failed on ruleindex: " + str(ruleindex) + " : " + str(rule))
@@ -66,4 +74,4 @@ for rule in myruleset.ruleset:
 
 print(myruleset.revref)
 print(myruleset.numrules)
-print(myruleset.ruletoregex(-1))
+print(myruleset.ruletoregex(5))
