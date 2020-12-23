@@ -13,7 +13,7 @@ class ruleset:
 		self._readindata(rulesetraw)
 	
 	def _readindata(self, rulesetraw):
-		rulesetraw = rulesetraw.split()
+		rulesetraw = rulesetraw.split('\n')
 		refregp = r'(\d): ([\d ]+)(?:\|([\d ]+))?'
 		letregp = r'(\d): "([ab])"'
 		for line in rulesetraw:
@@ -25,16 +25,19 @@ class ruleset:
 					matchset2 = [int(x) for x in match.group(3).strip().split(' ')]
 				except:
 					matchset2 = None
-				ruleset.append([matchnum, matchset1, matchset2])
+				self.ruleset.append([matchnum, matchset1, matchset2])
 			else:
 				match = re.match(letregp, line)
 				try:
 					matchnum = int(match.group(1))
 					matchlet = match.group(2)
-					ruleset.append([matchnum, matchlet])
+					self.ruleset.append([matchnum, matchlet])
 				except:
 					print("Failed to parse: " + line)
 		
 
 
 myruleset = ruleset(rawdata[0])
+
+for rule in myruleset.ruleset:
+	print(rule)
