@@ -20,9 +20,9 @@ class tile:
 	def _calcedges(self):
 		width, height = self.dim
 		tmptedge = self.thetile[0]
-		tmpredge = [line[width-1] for line in self.thetile]
+		tmpredge = ''.join([line[width-1] for line in self.thetile])
 		tmpbedge = self.thetile[height-1][::-1]
-		tmpledge = [line[0] for line in self.thetile][::-1]
+		tmpledge = ''.join([line[0] for line in self.thetile][::-1])
 
 		#get the compliment (edges backwards)
 
@@ -33,7 +33,6 @@ class tile:
 			
 		
 		def edgetobin(edge):
-			edge = ''.join(edge)
 			edge = edge.replace('.', '0').replace('#', '1')
 			edge = int(edge, 2)
 			return edge
@@ -41,7 +40,7 @@ class tile:
 		self.edges = (edgetobin(tmptedge), edgetobin(tmpredge), edgetobin(tmpbedge), edgetobin(tmpledge))
 		self.edgescompliment = (edgetobin(ctmptedge), edgetobin(ctmpredge), edgetobin(ctmpbedge), edgetobin(ctmpledge))
 
-class map:
+class amap:
 	def __init__(self, rawmapdata):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
 		self.tiles = [tile(t) for t in rawmapdata.strip().split('\n\n')]
@@ -76,16 +75,24 @@ class map:
 with open(r'.\Day20\testinput.txt') as thefile:
 	rawdata  = thefile.read()
 
-mymap = map(rawdata)
+mymap = amap(rawdata)
 
 def detransform(binnum):
-	tmpnum = bin(binnum)[1:]
+	tmpnum = format(binnum, '010b')
+	tmpnum = tmpnum.replace('0', '.').replace('1', '#')
+	return tmpnum
 
-
-mymap.print(1)
+print(mymap.tiles[-1].num)
+print(mymap.tiles[-1])
 print('\n')
-print(mymap.tiles[0].edges)
-print(mymap.tiles[0].edgescompliment)
+print(*map(detransform, mymap.tiles[-1].edges))
+print(*map(detransform, mymap.tiles[-1].edgescompliment))
+print('\n')
+print(mymap.tiles[5].num)
+print(mymap.tiles[5])
+print('\n')
+print(*map(detransform, mymap.tiles[5].edges))
+print(*map(detransform, mymap.tiles[5].edgescompliment))
 print(mymap.findcorners())
 print(mymap.numtiles)
 
