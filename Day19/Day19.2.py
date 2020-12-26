@@ -87,9 +87,9 @@ class ruleset:
 		# try: 
 		if ruleindex not in self.startletterindex:
 			if rule[1]: 
-				string = '(' + ''.join(rule[0]) + '|' + ''.join(rule[1]) + ')'
+				string = r'(' + ''.join(rule[0]) + r'|' + ''.join(rule[1]) + ')'
 			else:
-				string = '(' + ''.join(rule[0]) + ')'
+				string = ''.join(rule[0])
 		else: 
 			#letter rule, just return the letter
 			string = rule
@@ -163,7 +163,7 @@ print(count)
 print(myruleset.reducedregex)
 
 
-# print(myruleset.ruletoregex(42))
-# print("\n")
-# print(myruleset.ruletoregex(31))
+print(myruleset.ruletoregex(42))
+print("\n")
+print(myruleset.ruletoregex(31))
 
