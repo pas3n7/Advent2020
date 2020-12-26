@@ -28,7 +28,8 @@ class ruleset:
 
 		##Changes for part 2
 		#self.linestochange = {8: [[42], [42, 8]], 11: [[42, 31], [42, 11, 31]]}
-		self.linestochange = {8: [[42], [42, 42]], 11: [[42, 31], [42, 42, 31]]}
+		#self.linestochange = {8: [[42], [42, 42]], 11: [[42, 31], [42, 42, 31]]}
+		self.linestochange = {}
 
 		#init ruleset
 		self.ruleset = {}
@@ -119,7 +120,7 @@ class ruleset:
 		while len(self.letteronlyrules) > 0:
 			self.reduce(self.letteronlyrules.pop(0))
 		self.reducedregex = self.ruleset[0][1]
-		self.reducedregex += r'\b'
+		self.reducedregex = r'\b' + self.reducedregex + r'\b'
 
 	def teststring(self, stringtotest):
 		#check if a passed in string is a valid rule
@@ -159,6 +160,10 @@ for m in messages:
 	
 print(count)
 
-print(myruleset.ruletoregex(42))
-print("\n")
-print(myruleset.ruletoregex(31))
+print(myruleset.reducedregex)
+
+
+# print(myruleset.ruletoregex(42))
+# print("\n")
+# print(myruleset.ruletoregex(31))
+
