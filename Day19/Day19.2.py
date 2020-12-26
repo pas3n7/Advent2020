@@ -10,7 +10,7 @@
 
 import re
 
-FILENAME = r'.\Day19\day2testinput.txt'
+FILENAME = r'.\Day19\input.txt'
 
 with open(FILENAME) as thefile:
 	rawdata = thefile.read().strip().split('\n\n')
@@ -93,6 +93,14 @@ class ruleset:
 		else: 
 			#letter rule, just return the letter
 			string = rule
+		###This is crap, but I don't care, I hate this puzzle. 42 | 42 (42 | 42 (42 | 42 (42 | 42 (42 | 42 (42 | 42 8))))) == 42+ I guess
+		##I'm tired of dealing with this one
+		if ruleindex == 8:
+			string = ''.join(self.ruletoregex(42)) + "+"
+		elif ruleindex == 11:
+			l = ''.join(self.ruletoregex(42))
+			r = ''.join(self.ruletoregex(31))
+			string = r'(' + ''.join([l+r'{' + str(index) + r'}' + r +r'{' + str(index) + r'}|' for index in range(1, 9)])[:-1] + r')'
 		# except: 
 		# 	string = None
 		# 	print("ruletoregex failed on ruleindex: " + str(ruleindex) + " : " + str(rule))
