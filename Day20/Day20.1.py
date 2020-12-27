@@ -9,11 +9,17 @@ class tile:
 		#direction will be (from most significant bit to least) in the clockwise direction around the edge
 		#l to right on the top, top to bottom on the right, right to left on the bottom, bottom to top on the left
 		#this way the vaue of the edges does not change with rotation, just the position
-		self.edges = None #will be a tuple of edges (self.tedge, self.redge, self.bedge, self.ledge) 
-		self.edgescompliment = None #will be the edges, but backwards, as this is how we will find a matching edge
+		self.edges = None #will be a dict of edges top, right, bottom, left 
+		self.edgescompliment = None #will be a dict, with reverses of edges
 		
 		self._calcedges()
 
+		self.iscorner = None
+		self.isedge = None
+		self.flipx = None  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
+		self.flipy = None
+		self.rotation = 0   ##note that flipping in both x and y is equivalent to a 180 degree rotation
+							
 	def __str__(self):
 		return '\n'.join(self.thetile)
 
@@ -37,14 +43,29 @@ class tile:
 			edge = int(edge, 2)
 			return edge
 		
-		self.edges = (edgetobin(tmptedge), edgetobin(tmpredge), edgetobin(tmpbedge), edgetobin(tmpledge))
-		self.edgescompliment = (edgetobin(ctmptedge), edgetobin(ctmpredge), edgetobin(ctmpbedge), edgetobin(ctmpledge))
+		##always top, right, bottom, left. evaluated clockwise
+		self.edges = {"top": edgetobin(tmptedge), "right": edgetobin(tmpredge), "bottom": edgetobin(tmpbedge), "left": edgetobin(tmpledge)}
+		self.edgescompliment = {"top":edgetobin(ctmptedge), "right":edgetobin(ctmpredge), "bottom":edgetobin(ctmpbedge), "left":edgetobin(ctmpledge)}
+
+	def getedges(self):
+		return self.edges
+	def getedgescompliment(self):
+		return self.edgescompliment
+	def getflipxedges(self):
+		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
+		return {"top":self.edgescompliment["top"], "right":self.edgescompliment["left"], "bottom":self.edgescompliment["bottom"], "left":self.edgescompliment["right"]}
+	def getflipyedges(self):
+		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
+		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
 
 class amap:
 	def __init__(self, rawmapdata):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
 		self.tiles = [tile(t) for t in rawmapdata.strip().split('\n\n')]
 		self.numtiles = len(self.tiles)
+
+		self.alledges = [value for atile in self.tiles for value in atile.getedges().values()]
+		self.alledgescomp = [value for atile in self.tiles for value in atile.getedgescompliment().values()]
 
 	
 
@@ -53,16 +74,31 @@ class amap:
 			print(self.tiles[i])
 			print('\n') ##for now, to make it easier
 
+
+
 	def findcorners(self):
-		#corners should (hopefully) be the tiles for which 2 edges have no match 
+		#corners should be the tiles for which 2 edges have no match after checking all orientations
+		#per the prompt: but the outermost edges won't line up with any other tiles.
 		#this is not even remotely optimal, but let's just get it done
-		#really needs to be 2 adjacent matches and no more
-		alledges = [ edge for t in self.tiles	for edge in t.edges]
-			#will end up being all edges, in the same order as the tiles, 4 per. Can use that to step through efficiently
+
+		#flipping the tile reverses the order of the numbers
+		#Need to compare to compiment and non compliment because others might be flipped
+		#with tile to test, check compliment (which represents matches if it is not flipped), and non compliment (which represent maches if flipped)
+		#whichever has more matches should be correct.
+		#This approach might match more than one edge on our tile to another single tile, but let's hope not
+		
 		corners = []
 		for index, atile in enumerate(self.tiles):
 			matches = 0
-			matches = len([index for index, edge in enumerate(atile.edgescompliment) if edge in alledges[:index*4] + alledges[(index*4)+4:]])
+			allotheredges = self.alledges[:index*4] + self.alledges[(index*4)+4:] + self.alledgescomp[:index*4] + self.alledgescomp[(index*4)+4:]
+			matchesunflip = len([edge for edge in atile.getedgescompliment().values() if edge in allotheredges])
+			matchesflip = len([edge for edge in atile.getedges().values() if edge in allotheredges])
+			if (matchesunflip > matchesflip):
+				#tile has more matches when not flipped
+				matches = matchesunflip
+			else:
+				matches = matchesflip
+			
 			if matches == 2:
 				corners.append(atile.num)
 			elif matches < 2:
@@ -85,14 +121,20 @@ def detransform(binnum):
 print(mymap.tiles[-1].num)
 print(mymap.tiles[-1])
 print('\n')
-print(*map(detransform, mymap.tiles[-1].edges))
-print(*map(detransform, mymap.tiles[-1].edgescompliment))
+print(*map(detransform, mymap.tiles[-1].getedges().values()))
+print(*map(detransform, mymap.tiles[-1].getedgescompliment().values()))
 print('\n')
 print(mymap.tiles[5].num)
 print(mymap.tiles[5])
 print('\n')
-print(*map(detransform, mymap.tiles[5].edges))
-print(*map(detransform, mymap.tiles[5].edgescompliment))
-print(mymap.findcorners())
+print(*map(detransform, mymap.tiles[5].getedges().values()))
+print(*map(detransform, mymap.tiles[5].getedgescompliment().values()))
+print(corners := mymap.findcorners())
 print(mymap.numtiles)
+
+product = 1
+for i in corners:
+	product *= i
+
+print("product of corners:" + str(product))
 
