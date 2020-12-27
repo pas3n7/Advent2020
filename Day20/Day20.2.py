@@ -58,6 +58,11 @@ class tile:
 	def getflipyedges(self):
 		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
+	def detransform(self, num):
+		#will take a num and transform back to the form edges take in the input, for troubleshooting
+		tmpnum = format(num, '010b')
+		tmpnum = tmpnum.replace('0', '.').replace('1', '#')
+		return tmpnum
 
 class amap:
 	def __init__(self, rawmapdata):
@@ -106,6 +111,8 @@ class amap:
 				self.edges.append(atile.num)
 			elif matches < 2:
 				print("finding corners is probably broken for tile: " + str(atile.num))
+			elif matches > 4:
+				print(str(atile.num) + " is matching more than 4 edges")
 		return self.corners
 		
 	def assembleborder(self):
@@ -113,10 +120,10 @@ class amap:
 			print("Run findcorners first")
 			return None
 		
-		##first, find the orientation
-
+		##pick a corner and search edges for 
 		
 
+		
 
 
 with open(r'.\Day20\testinput.txt') as thefile:
@@ -124,31 +131,5 @@ with open(r'.\Day20\testinput.txt') as thefile:
 
 mymap = amap(rawdata)
 
-def detransform(binnum):
-	tmpnum = format(binnum, '010b')
-	tmpnum = tmpnum.replace('0', '.').replace('1', '#')
-	return tmpnum
 
-print(mymap.tiles[-1].num)
-print(mymap.tiles[-1])
-print('\n')
-print(*map(detransform, mymap.tiles[-1].getedges().values()))
-print(*map(detransform, mymap.tiles[-1].getedgescompliment().values()))
-print('\n')
-print(mymap.tiles[5].num)
-print(mymap.tiles[5])
-print('\n')
-print(*map(detransform, mymap.tiles[5].getedges().values()))
-print(*map(detransform, mymap.tiles[5].getedgescompliment().values()))
-print(corners := mymap.findcorners())
-print(mymap.numtiles)
 
-product = 1
-for i in corners:
-	product *= i
-
-print("product of corners:" + str(product))
-
-print("numtiles: "+ str(mymap.numtiles))
-print("numedges:" + str(len(mymap.edges)))
-print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
