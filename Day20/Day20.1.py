@@ -66,14 +66,15 @@ class amap:
 
 		self.alledges = [value for atile in self.tiles for value in atile.getedges().values()]
 		self.alledgescomp = [value for atile in self.tiles for value in atile.getedgescompliment().values()]
-
+		self.corners= []
+		self.edges = []
 	
 
 	def print(self, numtoprint):
 		for i in range(numtoprint):
 			print(self.tiles[i])
 			print('\n') ##for now, to make it easier
-
+	
 
 
 	def findcorners(self):
@@ -100,15 +101,22 @@ class amap:
 				matches = matchesflip
 			
 			if matches == 2:
+				self.tiles[index].iscorner = True
+				self.tiles[index].isedge = False
 				corners.append(atile.num)
+				self.corners.append(atile.num)
+			elif matches == 3:
+				self.tiles[index].isedge = True
+				self.tiles[index].iscorner = False
+				self.edges.append(atile.num)
 			elif matches < 2:
 				print("finding corners is probably broken for tile: " + str(atile.num))
-		return corners
+		return self.corners
 			
 
 
 
-with open(r'.\Day20\testinput.txt') as thefile:
+with open(r'.\Day20\input.txt') as thefile:
 	rawdata  = thefile.read()
 
 mymap = amap(rawdata)
@@ -138,3 +146,4 @@ for i in corners:
 
 print("product of corners:" + str(product))
 
+print("numedges:" + str(len(mymap.edges)))
