@@ -16,6 +16,7 @@ class tile:
 
 		self.iscorner = None
 		self.isedge = None
+		self.isflipped = None
 		self.flipx = None  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
 		self.flipy = None
 		self.rotation = 0   ##note that flipping in both x and y is equivalent to a 180 degree rotation
@@ -92,13 +93,7 @@ class amap:
 		for index, atile in enumerate(self.tiles):
 			matches = 0
 			allotheredges = self.alledges[:index*4] + self.alledges[(index*4)+4:] + self.alledgescomp[:index*4] + self.alledgescomp[(index*4)+4:]
-			matchesunflip = len([edge for edge in atile.getedgescompliment().values() if edge in allotheredges])
-			matchesflip = len([edge for edge in atile.getedges().values() if edge in allotheredges])
-			if (matchesunflip > matchesflip):
-				#tile has more matches when not flipped
-				matches = matchesunflip
-			else:
-				matches = matchesflip
+			matches = len([edge for edge in atile.getedgescompliment().values() if edge in allotheredges])
 			
 			if matches == 2:
 				self.tiles[index].iscorner = True
@@ -112,11 +107,19 @@ class amap:
 			elif matches < 2:
 				print("finding corners is probably broken for tile: " + str(atile.num))
 		return self.corners
-			
+		
+	def assembleborder(self):
+		if self.corners == []:
+			print("Run findcorners first")
+			return None
+		
+		##first, find the orientation
+
+		
 
 
 
-with open(r'.\Day20\input.txt') as thefile:
+with open(r'.\Day20\testinput.txt') as thefile:
 	rawdata  = thefile.read()
 
 mymap = amap(rawdata)
@@ -146,4 +149,6 @@ for i in corners:
 
 print("product of corners:" + str(product))
 
+print("numtiles: "+ str(mymap.numtiles))
 print("numedges:" + str(len(mymap.edges)))
+print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
