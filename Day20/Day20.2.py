@@ -119,6 +119,18 @@ class amap:
 		self.map = []
 		if rawmapdata:
 			self.readindata(rawmapdata)
+	def __str__(self):
+		tiledim = self.tiles[0].dim[0]
+		lines = []
+		for row in self.map:
+			for linenum in range(tiledim):
+				thisline = ""
+				for tile in row:
+					thisline += tile.thetile[linenum]
+				lines.append(thisline)
+		return '\n'.join(lines)
+		
+
 	
 	def readindata(self, rawmapdata):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
@@ -226,9 +238,20 @@ class amap:
 	
 	def rotatetile(self, knowngood, torotate):
 		#feed 2 connected tiles, second will be rotated to connect appropriately with the first
-		match = self.howmatch(knowngood, tile2)
-			
-	
+		match = self.howmatch(knowngood, torotate)
+		sideref = {"top" : 0, "right" :1, "bottom" : 2, "left": 3}
+		goodsidenum = sideref[match[0]]
+		testsidenum = sideref[match[1]] + 2 % 4  #rotate the number indexes by 2 places
+		#if goodsidenum - testsidenum is negative, wants a counterclockwise rotation
+		#to convert to clockwise, just add 4
+		diff = goodsidenum - testsidenum
+		if diff < 0:
+			diff += 4
+		torotate.rotation = 360% (diff * 90)
+		return torotate
+
+
+
 	def matchall(self):
 		temptilelist = []
 		isflip = {}
@@ -319,4 +342,4 @@ for tile in mymap.tiles:
 	print(tile.flipx, tile.flipy)
 
 mymap.assemble()
-print(mymap.map)
+print(mymap)
