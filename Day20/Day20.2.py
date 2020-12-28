@@ -1,4 +1,5 @@
 from math import floor
+from copy import deepcopy
 
 class tile:
 	def __init__(self, rawdata):
@@ -133,11 +134,6 @@ class amap:
 			elif matches < 2:
 				print("finding corners is probably broken for tile: " + str(atile.num))
 		return self.corners
-		
-	def assembleborder(self):
-		if self.corners == []:
-			print("Run findcorners first")
-			return None
 	
 	def findmatch(self, atile):
 		#just find the matching tile, don't care about orientation
@@ -168,3 +164,22 @@ def detransform(binnum):
 print("numtiles: "+ str(mymap.numtiles))
 print("numedges:" + str(len(mymap.edges)))
 print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
+
+
+mymapcopy = amap()
+
+mymapcopy.tiles = deepcopy(mymap.tiles)
+mymapcopy.update()
+
+print(mymapcopy.tiles[0].edges)
+print(mymap.tiles[0].edges)
+mymapcopy.tiles[0].edges = ['testing']
+
+
+print(mymapcopy.tiles[0].edges)
+print(mymap.tiles[0].edges)
+
+mymapcopy.numtiles = 0
+
+print(mymapcopy.numtiles)
+print(mymap.numtiles)
