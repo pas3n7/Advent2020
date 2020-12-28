@@ -155,6 +155,11 @@ class amap:
 		return matchtiles
 
 	def howmatch(self, tile1, tile2):
+		#allow passing in a tile number
+		if isinstance(tile1, int):
+			tile1 = self.gettilebynum(tile1)
+		if isinstance(tile2, int):
+			tile2 = self.gettilebynum(tile2)
 		##given 2 tiles, return (tile1 matching edge, tile2matchingedge, does tile2 need to be flipped)
 		returnval = None
 		tile1edges = tile1.getedgescompliment()
@@ -188,6 +193,7 @@ print("numtiles: "+ str(mymap.numtiles))
 print("numedges:" + str(len(mymap.edges)))
 print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
 
+tile1 = mymap.tiles[0]
+tile2 = mymap.findmatch(tile1)[0]
 
-mymapcopy = amap()
-
+print(mymap.howmatch(tile1, tile2))
