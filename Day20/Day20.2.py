@@ -153,7 +153,22 @@ class amap:
 		matchtiles = [floor(x%len(self.alledges)/4) for x in matchedges]
 		matchtiles = [self.tiles[i] for i in matchtiles if self.tiles[i] is not atile]
 		return matchtiles
-		
+
+	def howmatch(self, tile1, tile2):
+		##given 2 tiles, return (tile1 matching edge, tile2matchingedge, does tile2 need to be flipped)
+		returnval = None
+		tile1edges = tile1.getedgescompliment()
+		for edge in tile1edges.items():
+			for t2edge in tile2.getedges().items():
+				if edge[1] == t2edge[1]:
+					returnval = (edge[0], t2edge[0], False)
+					break
+			for t2edge in tile2.getedgescompliment().items():
+				if edge[1] == t2edge[1]:
+					returnval = (edge[0], t2edge[0], True)
+					break
+		return returnval
+
 
 		
 
@@ -176,18 +191,3 @@ print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 
 
 mymapcopy = amap()
 
-mymapcopy.tiles = deepcopy(mymap.tiles)
-mymapcopy.update()
-
-print(mymapcopy.tiles[0].edges)
-print(mymap.tiles[0].edges)
-mymapcopy.tiles[0].edges = ['testing']
-
-
-print(mymapcopy.tiles[0].edges)
-print(mymap.tiles[0].edges)
-
-mymapcopy.numtiles = 0
-
-print(mymapcopy.numtiles)
-print(mymap.numtiles)
