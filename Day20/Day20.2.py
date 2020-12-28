@@ -23,6 +23,9 @@ class tile:
 		self.flipx = None  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
 		self.flipy = None
 		self.rotation = 0   ##note that flipping in both x and y is equivalent to a 180 degree rotation
+
+		self.neighbors = {"top": None, "right": None, "bottom": None, "left": None} #list of all the neighboring tiles
+		self.numneighbors = 0
 							
 	def __str__(self):
 		return '\n'.join(self.thetile)
@@ -111,6 +114,9 @@ class amap:
 
 
 	def findcorners(self):
+		#this is pointless now, but I'll remove it later
+		raise UserWarning("don't use findcorners")
+
 		#corners should be the tiles for which 2 edges have no match after checking all orientations
 		#per the prompt: but the outermost edges won't line up with any other tiles.
 		#this is not even remotely optimal, but let's just get it done
@@ -140,21 +146,27 @@ class amap:
 				print("finding corners is probably broken for tile: " + str(atile.num))
 			elif matches > 4:
 				print(str(atile.num) + " is matching more than 4 edges")
-		return self.corners
+		# return self.corners
+		return False  #this function is pointless now. Will remove it later
 	
-	def findmatch(self, atile):
+	def findmatch(self, atile, side = None):
 		#just find the matching tile, don't care about orientation
 		##if fed an int, turn it into a tile
 		if isinstance(atile, int):
 			atile = self.gettilebynum(atile)
-		matchtiles = []
-		thistileedges = atile.edgescompliment.values()
+		#if we are given a side, only check that side, otherwise, check all
+		if side:
+			thistileedges = [atile.getedgescompliment()[side]]
+		else:
+			thistileedges = atile.getedgescompliment().values()
+
 		matchedges = [index for index, edge in enumerate(self.alledges + self.alledgescomp) if edge in thistileedges]
 		matchtiles = [floor(x%len(self.alledges)/4) for x in matchedges]
 		matchtiles = [self.tiles[i] for i in matchtiles if self.tiles[i] is not atile]
 		return matchtiles
 
 	def howmatch(self, tile1, tile2):
+		#why am I doing this separately from findmatch? idk just get it done
 		#allow passing in a tile number
 		if isinstance(tile1, int):
 			tile1 = self.gettilebynum(tile1)
@@ -173,12 +185,26 @@ class amap:
 					returnval = (edge[0], t2edge[0], True)
 					break
 		return returnval
-
-
+	
+	def matchall(self):
+		temptilelist = []
+		for tile in self.tiles:
+			neighbors = self.findmatch(tile)
+			for i in neighbors:
+				side = self.howmatch(tile, i)[0] #gives us which side of the current tile the match is for
+				tile.neighbors[side] = i
+			temptilelist.append(tile)
+			tile.numneighbors = len(neighbors)
+		self.tiles = temptilelist
 		
 
 
-with open(r'.\Day20\testinput.txt') as thefile:
+		
+fn = r'.\Day20\testinput.txt'
+#fn = r'.\Day20\input.txt'
+
+
+with open(fn) as thefile:
 	rawdata  = thefile.read()
 
 mymap = amap(rawdata)
@@ -193,7 +219,8 @@ print("numtiles: "+ str(mymap.numtiles))
 print("numedges:" + str(len(mymap.edges)))
 print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
 
-tile1 = mymap.tiles[0]
-tile2 = mymap.findmatch(tile1)[0]
+tile1 = mymap.tiles[8]
 
-print(mymap.howmatch(tile1, tile2))
+mymap.matchall()
+
+print(tile1.neighbors)
