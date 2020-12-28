@@ -61,6 +61,11 @@ class tile:
 	def getflipyedges(self):
 		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
+	def detransform(self, num):
+		#will take a num and transform back to the form edges take in the input, for troubleshooting
+		tmpnum = format(num, '010b')
+		tmpnum = tmpnum.replace('0', '.').replace('1', '#')
+		return tmpnum
 
 class amap:
 	def __init__(self, rawmapdata=None):
@@ -133,6 +138,8 @@ class amap:
 				self.edges.append(atile.num)
 			elif matches < 2:
 				print("finding corners is probably broken for tile: " + str(atile.num))
+			elif matches > 4:
+				print(str(atile.num) + " is matching more than 4 edges")
 		return self.corners
 	
 	def findmatch(self, atile):
@@ -148,6 +155,7 @@ class amap:
 		return matchtiles
 		
 
+		
 
 
 with open(r'.\Day20\testinput.txt') as thefile:
