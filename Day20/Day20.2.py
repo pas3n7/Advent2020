@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, sqrt
 from copy import deepcopy
 
 class tile:
@@ -80,6 +80,25 @@ class tile:
 		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
 		return {"top":self.edges["bottom"], "right":self.edges["right"], "bottom":self.edges["top"], "left":self.edges["left"]}
 
+	def getneighbors(self):
+		tempnei = self.neighbors
+		#{"top": None, "right": None, "bottom": None, "left": None}
+		if self.flipx:
+			tempnei = {"top": tempnei["top"], "right": tempnei["left"], "bottom": tempnei["bottom"], "left": tempnei["right"]}
+		elif self.flipy:
+			tempnei = {"top": tempnei["top"], "right": tempnei["left"], "bottom": tempnei["bottom"], "left": tempnei["right"]}
+		tempnei	= self.rotate(tempnei, self.rotation)
+		return tempnei
+
+	def rotate(self, neighbordict, degrees):
+		#do a 90 degree clockwise rotation for now
+		#neighbor that was left is now top
+		#need to make sure it's in the right order
+		tmplist = [neighbordict["top"], neighbordict["right"], neighbordict["bottom"], neighbordict["left"]]
+		for _ in range(degrees %360 //90):
+			tmplist.append(tmplist.pop(1)) #rotate
+		return {"top": tmplist[0], "right":tmplist[1], "bottom": tmplist[2], "left": tmplist[3]}
+
 	def detransform(self, num):
 		#will take a num and transform back to the form edges take in the input, for troubleshooting
 		tmpnum = format(num, '010b')
@@ -97,6 +116,7 @@ class amap:
 		self.alledgescomp = []
 		self.corners = []
 		self.edges = []
+		self.map = []
 		if rawmapdata:
 			self.readindata(rawmapdata)
 	
@@ -204,6 +224,11 @@ class amap:
 					break
 		return returnval
 	
+	def rotatetile(self, knowngood, torotate):
+		#feed 2 connected tiles, second will be rotated to connect appropriately with the first
+		match = self.howmatch(knowngood, tile2)
+			
+	
 	def matchall(self):
 		temptilelist = []
 		isflip = {}
@@ -227,6 +252,41 @@ class amap:
 			temptilelist.append(tile)
 			tile.numneighbors = len(neighbors)
 		self.tiles = temptilelist
+
+	def assemble(self):
+		corners = [tile for tile in self.tiles if tile.numneighbors == 2]
+		topleft = None #keep in mind the whole thing could be flipped or rotated
+		for i in corners:
+			if i.neighbors["right"] and i.neighbors["bottom"]:
+				topleft = i
+		#print(topleft.num)
+		dim = floor(sqrt(self.numtiles))
+
+		
+		#assemble the first column
+		#we don't know which way they are rotated, so can't trust their neighbor direction, but can assemble in place
+		# based on the number of neighbors. the neighbor with the lowest num neighbors is the next one
+
+		def assemblecolrow(colaslist, length, side=None):
+			#pass in a list with a corner as the only member, and a direction
+			#if given a side, just go that direction
+			if side:
+				colaslist.append(colaslist[-1].getneighbors()[side]) #add the next one
+				colaslist = assemblecolrow(colaslist, length)
+			elif len(colaslist) < length:
+				neighbors = { side : tile for side, tile in colaslist[-1].getneighbors().items() if tile and tile not in colaslist}
+				nexttile = neighbors[min(neighbors, key= lambda n : neighbors[n].numneighbors)]
+				colaslist.append(nexttile)
+				colaslist = assemblecolrow(colaslist, length)
+
+			return colaslist
+
+
+		#assemble first column
+		themap = [[rowindzero] for rowindzero in assemblecolrow([topleft], dim, "bottom")]
+		self.map = themap
+
+
 		
 
 
@@ -257,3 +317,6 @@ mymap.matchall()
 for tile in mymap.tiles:
 	print(tile.num)
 	print(tile.flipx, tile.flipy)
+
+mymap.assemble()
+print(mymap.map)
