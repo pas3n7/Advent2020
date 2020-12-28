@@ -62,15 +62,32 @@ class tile:
 		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
 
 class amap:
-	def __init__(self, rawmapdata):
+	def __init__(self, rawmapdata=None):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
-		self.tiles = [tile(t) for t in rawmapdata.strip().split('\n\n')]
-		self.numtiles = len(self.tiles)
+		self.tiles = []
+		self.numtiles = 0
+		self.alledges = []
+		self.alledgescomp = []
+		self.corners = []
+		self.edges = []
+		if rawmapdata:
+			self.readindata(rawmapdata)
+	
+	def readindata(self, rawmapdata):
+		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
+		self.tiles.extend([tile(t) for t in rawmapdata.strip().split('\n\n')])
+		self.update()
 
+	def addtile(self, tile):
+		self.tiles.append(tile)
+		self.numtiles += 1
+		self.alledges.extend(tile.getedges().values())
+		self.alledges.extend(tile.getedgescompliment().values())
+
+	def update(self):
+		self.numtiles = len(self.tiles)
 		self.alledges = [value for atile in self.tiles for value in atile.getedges().values()]
 		self.alledgescomp = [value for atile in self.tiles for value in atile.getedgescompliment().values()]
-		self.corners= []
-		self.edges = []
 	
 
 	def print(self, numtoprint):
@@ -78,6 +95,13 @@ class amap:
 			print(self.tiles[i])
 			print('\n') ##for now, to make it easier
 	
+	def gettilebynum(self, num):
+		thistile = None
+		for t in self.tiles:
+			if t.num == num:
+				thistile = t
+		return thistile
+
 
 
 	def findcorners(self):
@@ -116,17 +140,16 @@ class amap:
 			return None
 	
 	def findmatch(self, atile):
+		#just find the matching tile, don't care about orientation
+		##if fed an int, turn it into a tile
+		if isinstance(atile, int):
+			atile = self.gettilebynum(atile)
 		matchtiles = []
-		thistileedges = atile.edgescompliment.items()
+		thistileedges = atile.edgescompliment.values()
 		matchedges = [index for index, edge in enumerate(self.alledges + self.alledgescomp) if edge in thistileedges]
-		matchtiles = [(floor(x/4), 'noflip') if x < (len(self.alledges)) else (floor(x%len(self.alledges)/4, 'flip')) for x in matchedges]
+		matchtiles = [floor(x%len(self.alledges)/4) for x in matchedges]
+		matchtiles = [self.tiles[i] for i in matchtiles if self.tiles[i] is not atile]
 		return matchtiles
-		
-
-
-		
-		
-
 		
 
 
@@ -141,25 +164,6 @@ def detransform(binnum):
 	tmpnum = tmpnum.replace('0', '.').replace('1', '#')
 	return tmpnum
 
-print(mymap.tiles[-1].num)
-print(mymap.tiles[-1])
-print('\n')
-print(*map(detransform, mymap.tiles[-1].getedges().values()))
-print(*map(detransform, mymap.tiles[-1].getedgescompliment().values()))
-print('\n')
-print(mymap.tiles[5].num)
-print(mymap.tiles[5])
-print('\n')
-print(*map(detransform, mymap.tiles[5].getedges().values()))
-print(*map(detransform, mymap.tiles[5].getedgescompliment().values()))
-print(corners := mymap.findcorners())
-print(mymap.numtiles)
-
-product = 1
-for i in corners:
-	product *= i
-
-print("product of corners:" + str(product))
 
 print("numtiles: "+ str(mymap.numtiles))
 print("numedges:" + str(len(mymap.edges)))
