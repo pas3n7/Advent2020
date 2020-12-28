@@ -19,9 +19,8 @@ class tile:
 
 		self.iscorner = None
 		self.isedge = None
-		self.isflipped = None
-		self.flipx = None  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
-		self.flipy = None
+		self.flipx = False  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
+		self.flipy = False
 		self.rotation = 0   ##note that flipping in both x and y is equivalent to a 180 degree rotation
 
 		self.neighbors = {"top": None, "right": None, "bottom": None, "left": None} #list of all the neighboring tiles
@@ -37,38 +36,57 @@ class tile:
 		tmpbedge = self.thetile[height-1][::-1]
 		tmpledge = ''.join([line[0] for line in self.thetile][::-1])
 
-		#get the compliment (edges backwards)
+		ed = (tmptedge, tmpredge, tmpbedge, tmpledge)
+		ced = tuple(map(self._compedge, ed))
 
-		ctmptedge = tmptedge[::-1]
-		ctmpredge = tmpredge[::-1]
-		ctmpbedge = tmpbedge[::-1]
-		ctmpledge = tmpledge[::-1]
-			
+		#get the compliment (edges backwards)
 		
 		def edgetobin(edge):
 			edge = edge.replace('.', '0').replace('#', '1')
 			edge = int(edge, 2)
 			return edge
+
+		ed = tuple(map(edgetobin, ed))
+		ced = tuple(map(edgetobin, ced))
 		
 		##always top, right, bottom, left. evaluated clockwise
-		self.edges = {"top": edgetobin(tmptedge), "right": edgetobin(tmpredge), "bottom": edgetobin(tmpbedge), "left": edgetobin(tmpledge)}
-		self.edgescompliment = {"top":edgetobin(ctmptedge), "right":edgetobin(ctmpredge), "bottom":edgetobin(ctmpbedge), "left":edgetobin(ctmpledge)}
+		self.edges = {"top": ed[0], "right": ed[1], "bottom": ed[2], "left": ed[3]}
+		self.edgescompliment = {"top":ced[0], "right":ced[1], "bottom":ced[2], "left":ced[3]}
 
 	def getedges(self):
-		return self.edges
+		if self.flipx:
+			return self.getflipxedges()
+		elif self.flipy:
+			return self.getflipyedges()
+		else:
+			return self.edges
 	def getedgescompliment(self):
-		return self.edgescompliment
+		if self.flipx:
+			return self.getflipxedgescomp()
+		elif self.flipy:
+			return self.getflipyedgescomp()
+		else:
+			return self.edgescompliment
 	def getflipxedges(self):
 		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["top"], "right":self.edgescompliment["left"], "bottom":self.edgescompliment["bottom"], "left":self.edgescompliment["right"]}
 	def getflipyedges(self):
 		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
+	def getflipxedgescomp(self):
+		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
+		return {"top":self.edges["top"], "right":self.edges["left"], "bottom":self.edges["bottom"], "left":self.edges["right"]}
+	def getflipyedgescomp(self):
+		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
+		return {"top":self.edges["bottom"], "right":self.edges["right"], "bottom":self.edges["top"], "left":self.edges["left"]}
+
 	def detransform(self, num):
 		#will take a num and transform back to the form edges take in the input, for troubleshooting
 		tmpnum = format(num, '010b')
 		tmpnum = tmpnum.replace('0', '.').replace('1', '#')
 		return tmpnum
+	def _compedge(self, edge):
+		return edge[::-1]
 
 class amap:
 	def __init__(self, rawmapdata=None):
@@ -188,11 +206,24 @@ class amap:
 	
 	def matchall(self):
 		temptilelist = []
+		isflip = {}
 		for tile in self.tiles:
 			neighbors = self.findmatch(tile)
 			for i in neighbors:
-				side = self.howmatch(tile, i)[0] #gives us which side of the current tile the match is for
+				hm = self.howmatch(tile, i)
+				side = hm[0] #gives us which side of the current tile the match is for
+				otherside = hm[1]
+				if hm[2]: ##true if flipped
+					isflip[i] = otherside #store for now, add flipped flag when we come to it
 				tile.neighbors[side] = i
+
+			if tile in isflip:
+				if isflip[i] in ["left", "right"]:
+					tile.flipx = True
+				else:
+					tile.flipy = True
+
+
 			temptilelist.append(tile)
 			tile.numneighbors = len(neighbors)
 		self.tiles = temptilelist
@@ -223,4 +254,6 @@ tile1 = mymap.tiles[8]
 
 mymap.matchall()
 
-print(tile1.neighbors)
+for tile in mymap.tiles:
+	print(tile.num)
+	print(tile.flipx, tile.flipy)
