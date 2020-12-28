@@ -1,3 +1,5 @@
+from math import floor
+
 class tile:
 	def __init__(self, rawdata):
 		##rawdata should be a string with Tile \d{4}: at the top, and then the tile data, one line per line
@@ -112,8 +114,18 @@ class amap:
 		if self.corners == []:
 			print("Run findcorners first")
 			return None
+	
+	def findmatch(self, atile):
+		matchtiles = []
+		thistileedges = atile.edgescompliment.items()
+		matchedges = [index for index, edge in enumerate(self.alledges + self.alledgescomp) if edge in thistileedges]
+		matchtiles = [(floor(x/4), 'noflip') if x < (len(self.alledges)) else (floor(x%len(self.alledges)/4, 'flip')) for x in matchedges]
+		return matchtiles
 		
-		##first, find the orientation
+
+
+		
+		
 
 		
 
