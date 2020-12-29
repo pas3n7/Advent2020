@@ -35,7 +35,7 @@ class tile:
 			degrees = self.rotation
 		if not flip:
 			flip = self.flipx, self.flipy
-		thistile = self.thetile
+		thistile = [list(row) for row in self.thetile]
 		if degrees == 0:
 			ret = thistile
 		elif degrees == 90:
@@ -152,8 +152,9 @@ class amap:
 		for tilerow in self.map:
 			for linenum in range(tiledim):
 				linenumtoprint=[]
-				for tile in tilerow:
-					linenumtoprint.append(tile.thetile[linenum])
+				for atile in tilerow:
+					atile = atile.getorientedtile()
+					linenumtoprint.append(''.join(atile[linenum]))
 				toprint.append(''.join(linenumtoprint))
 		return '\n'.join(toprint)
 					
@@ -357,3 +358,5 @@ tile1 = mymap.tiles[8]
 mymap.assemble()
 mymap.printwithlines()
 mymap.printdebug()
+
+print(mymap)
