@@ -51,6 +51,9 @@ class tile:
 			#flip
 			ret = [row[::-1] for row in ret]
 
+		#return as a list of strings
+		ret = [''.join(row) for row in ret]
+
 		return ret
 
 	def getorientedstrippedtile(self):
@@ -87,14 +90,16 @@ class tile:
 
 	def getedges(self):
 		if self.flip:
-			return self.getflipedges()
+			ret = self.getflipedges()
 		else:
-			return self.edges
+			ret = self.edges
+		return self.rotate(ret, self.rotation)
 	def getedgescompliment(self):
 		if self.flip:
-			return self.getflipedgescomp()
+			ret = self.getflipedgescomp()
 		else:
-			return self.edgescompliment
+			ret = self.edgescompliment
+		return self.rotate(ret, self.rotation)
 	def getflipedges(self):
 		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["top"], "right":self.edgescompliment["left"], "bottom":self.edgescompliment["bottom"], "left":self.edgescompliment["right"]}
@@ -110,13 +115,13 @@ class tile:
 		tempnei	= self.rotate(tempnei, self.rotation)
 		return tempnei
 
-	def rotate(self, neighbordict, degrees):
+	def rotate(self, dicttorotate, degrees):
 		#do a 90 degree clockwise rotation for now
 		#neighbor that was left is now top
 		#need to make sure it's in the right order
-		tmplist = [neighbordict["top"], neighbordict["right"], neighbordict["bottom"], neighbordict["left"]]
+		tmplist = [dicttorotate["top"], dicttorotate["right"], dicttorotate["bottom"], dicttorotate["left"]]
 		for _ in range(degrees %360 //90):
-			tmplist.append(tmplist.pop(1)) #rotate
+			tmplist.insert(0, (tmplist.pop(-1))) #rotate
 		return {"top": tmplist[0], "right":tmplist[1], "bottom": tmplist[2], "left": tmplist[3]}
 
 	def detransform(self, num):
@@ -151,10 +156,12 @@ class amap:
 				toprint.append(''.join(linenumtoprint))
 		return '\n'.join(toprint)
 					
-	def printwithlines(self):
-		tiledim = self.tiles[0].dim[0]
+	def printwithlines(self, mymap=None):
+		if not mymap:
+			mymap=self.map
+		tiledim = mymap[0][0].dim[0]
 		toprint =  []
-		for tilerow in self.map:
+		for tilerow in mymap:
 			for linenum in range(tiledim):
 				linenumtoprint=[]
 				if linenum == 1 or linenum == tiledim - 1:
@@ -272,7 +279,6 @@ class amap:
 			for i in neighbors:
 				hm = self.howmatch(tile, i)
 				side = hm[0] #gives us which side of the current tile the match is for
-				otherside = hm[1]
 				tile.neighbors[side] = i
 
 
@@ -287,6 +293,7 @@ class amap:
 		for i in corners:
 			if i.neighbors["right"] and i.neighbors["bottom"]:
 				topleft = i
+				break
 		#print(topleft.num)
 		dim = floor(sqrt(self.numtiles))
 
