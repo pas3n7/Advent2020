@@ -148,28 +148,29 @@ class amap:
 			self.readindata(rawmapdata)
 	def __str__(self):
 		tiledim = self.tiles[0].dim[0]
-		lines = []
-		for row in self.map:
+		toprint =  []
+		for tilerow in self.map:
 			for linenum in range(tiledim):
-				thisline = ""
-				for tile in row:
-					thisline += tile.thetile[linenum]
-				lines.append(thisline)
-		return '\n'.join(lines)
-		
+				linenumtoprint=[]
+				for tile in tilerow:
+					linenumtoprint.append(tile.thetile[linenum])
+				toprint.append(''.join(linenumtoprint))
+		return '\n'.join(toprint)
+					
 	def printwithlines(self):
 		tiledim = self.tiles[0].dim[0]
-		lines = []
-		for row in self.map:
+		toprint =  []
+		for tilerow in self.map:
 			for linenum in range(tiledim):
-				if linenum == 1 or linenum == tiledim-1:
-					lines.append('\n')
-				thisline = ""
-				for tile in row:
-					thisline += tile.thetile[linenum][0] + "    " + tile.thetile[linenum][1:-1] + "    " + tile.thetile[linenum][-1]
-				lines.append(thisline)
-			
-		print( '\n'.join(lines))
+				linenumtoprint=[]
+				if linenum == 1 or linenum == tiledim - 1:
+					linenumtoprint.append('\n')
+				for atile in tilerow:
+					atile = atile.getorientedtile()
+					linenumtoprint.append(atile[linenum][0] + "    " + ''.join(atile[linenum][1:-1]) + "    " + atile[linenum][-1])
+				toprint.append(''.join(linenumtoprint))
+		print('\n'.join(toprint))
+
 
 	def printdebug(self):
 		debuginfo = [[(atile.num, atile.flipx, atile.flipy, atile.rotation) for atile in row] for row in self.map]
