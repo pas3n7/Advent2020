@@ -56,6 +56,14 @@ class tile:
 
 		return ret
 
+	def getorientedstrippedtile(self):
+		##strip the borders
+		mytile = self.getorientedtile()
+		mytile = [row[1:-1] for row in mytile[1:-1]]
+		return mytile
+
+
+
 	def _calcedges(self):
 		width, height = self.dim
 		tmptedge = self.thetile[0]
@@ -147,13 +155,13 @@ class amap:
 		if rawmapdata:
 			self.readindata(rawmapdata)
 	def __str__(self):
-		tiledim = self.tiles[0].dim[0]
+		tiledim = len(self.tiles[0].getorientedstrippedtile())
 		toprint =  []
 		for tilerow in self.map:
 			for linenum in range(tiledim):
 				linenumtoprint=[]
 				for atile in tilerow:
-					atile = atile.getorientedtile()
+					atile = atile.getorientedstrippedtile()
 					linenumtoprint.append(''.join(atile[linenum]))
 				toprint.append(''.join(linenumtoprint))
 		return '\n'.join(toprint)
