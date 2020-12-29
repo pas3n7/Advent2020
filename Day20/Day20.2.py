@@ -148,7 +148,19 @@ class amap:
 				lines.append(thisline)
 		return '\n'.join(lines)
 		
-
+	def printwithlines(self):
+		tiledim = self.tiles[0].dim[0]
+		lines = []
+		for row in self.map:
+			for linenum in range(tiledim):
+				if linenum == 1 or linenum == tiledim-1:
+					lines.append('\n')
+				thisline = ""
+				for tile in row:
+					thisline += tile.thetile[linenum][0] + "    " + tile.thetile[linenum][1:-1] + "    " + tile.thetile[linenum][-1]
+				lines.append(thisline)
+			
+		print( '\n'.join(lines))
 	
 	def readindata(self, rawmapdata):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
@@ -170,7 +182,7 @@ class amap:
 	def print(self, numtoprint):
 		for i in range(numtoprint):
 			print(self.tiles[i])
-			print('\n') ##for now, to make it easier
+			
 	
 	def gettilebynum(self, num):
 		thistile = None
@@ -332,8 +344,14 @@ class amap:
 			return colaslist
 
 
-		#assemble first column
+		#assemble first column, list comprehension to turn it from a list into a column
 		themap = [[rowindzero] for rowindzero in assemblecolrow([topleft], dim, "bottom")]
+
+		for index, rowleader in enumerate(themap):
+			themap[index] = assemblecolrow(rowleader, dim, "right")
+
+
+
 		self.map = themap
 
 
@@ -365,4 +383,4 @@ tile1 = mymap.tiles[8]
 
 
 mymap.assemble()
-print(mymap)
+mymap.printwithlines()
