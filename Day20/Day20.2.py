@@ -36,20 +36,23 @@ class tile:
 		if not flip:
 			flip = self.flip
 		thistile = [list(row) for row in self.thetile]
-		if degrees == 0:
+		if flip:
+			#flip
+			ret = [row[::-1] for row in thistile]
+		else:
 			ret = thistile
+		if degrees == 0:
+			pass
 		elif degrees == 90:
-			ret = [[row[col] for row in thistile[::-1]] for col in range(len(thistile))]
+			ret = [[row[col] for row in ret[::-1]] for col in range(len(ret))]
 		elif degrees == 180:
-			ret = [row[::-1] for row in thistile[::-1]]
+			ret = [row[::-1] for row in ret[::-1]]
 		elif degrees == 270:
-			ret = [[row[col] for row in thistile] for col in range(len(thistile)-1, 0-1, -1)]
+			ret = [[row[col] for row in ret] for col in range(len(ret)-1, 0-1, -1)]
 		else:
 			print("rotation failed")
 
-		if flip:
-			#flip
-			ret = [row[::-1] for row in ret]
+
 
 		#return as a list of strings
 		ret = [''.join(row) for row in ret]
@@ -327,8 +330,8 @@ class amap:
 
 
 		
-fn = r'.\Day20\testinput.txt'
-#fn = r'.\Day20\input.txt'
+#fn = r'.\Day20\testinput.txt'
+fn = r'.\Day20\input.txt'
 
 
 with open(fn) as thefile:
