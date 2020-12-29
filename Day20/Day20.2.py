@@ -351,9 +351,7 @@ mymap.assemble()
 
 sea = str(mymap)
 
-mymap.printwithlines()
-mymap.printdebug()
-
+monsterindex=[]
 def seamonstersearch(sea):
 	sea = sea.split('\n')
 	monsterline1 = r"..................#."
@@ -365,8 +363,10 @@ def seamonstersearch(sea):
 	
 		if index == 0:
 			continue  #skip the first line, since we are looking for the second monster line
-		if match := re.search(monsterline2, line):
-			if re.match(monsterline1, sea[index-1][match.start():]) and re.match(monsterline3, sea[index+1][match.start():]):
+		match = re.finditer(monsterline2, line)
+		for s in [m.start() for m in match]:
+			if re.match(monsterline1, sea[index-1][s:]) and re.match(monsterline3, sea[index+1][s:]):
+				monsterindex.append((index+1, s+1))
 				monstercount+= 1
 
 	return monstercount
@@ -383,8 +383,10 @@ def fliprotate(sea, *, rotate=False, flip=False):
 
 nummonsters = 0
 flipped = 0
+print(sea)
+print("do things --------------------------")
 for _ in range(2):
-	for _ in range(3):
+	for _ in range(4):
 		#rotate, check, repeat
 
 		nummonsters = seamonstersearch(sea)
@@ -392,13 +394,17 @@ for _ in range(2):
 			sea = fliprotate(sea, rotate=True)
 		else:
 			break
-	sea = fliprotate(sea, rotate=True) #flip back upright
 	if nummonsters == 0:
-		if flipped == 0:
-			sea = fliprotate(sea, flip=True)
-			flipped += 1
-		else:
-			break
+		sea = fliprotate(sea, flip=True)
 	else:
 		break
 print(nummonsters)
+
+monsterline1 = r"..................#."
+monsterline2 = r"#....##....##....###"
+monsterline3 = r".#..#..#..#..#..#..."
+numpoundsinmonster = (monsterline1 + monsterline2 + monsterline3).count("#")
+numpoundsinsea = sea.count("#")
+
+print(monsterindex)
+print(numpoundsinsea-(numpoundsinmonster*nummonsters))
