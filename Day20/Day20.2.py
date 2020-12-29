@@ -20,9 +20,8 @@ class tile:
 
 		self.iscorner = None
 		self.isedge = None
-		self.flipx = False  ###I don't want to actually modify the tile, just mark if it needs to be flipped in either direction
-		self.flipy = False
-		self.rotation = 0   ##note that flipping in both x and y is equivalent to a 180 degree rotation
+		self.flip = False  ###A flip in the y is equivalent to a flip in the x + a 180 degree rotation
+		self.rotation = 0   
 
 		self.neighbors = {"top": None, "right": None, "bottom": None, "left": None} #list of all the neighboring tiles
 		self.numneighbors = 0
@@ -35,7 +34,7 @@ class tile:
 		if not degrees:
 			degrees = self.rotation
 		if not flip:
-			flip = self.flipx, self.flipy
+			flip = self.flip
 		thistile = [list(row) for row in self.thetile]
 		if degrees == 0:
 			ret = thistile
@@ -48,12 +47,9 @@ class tile:
 		else:
 			print("rotation failed")
 
-		if flip[0]:
-			#flipx
+		if flip:
+			#flip
 			ret = [row[::-1] for row in ret]
-		elif flip[1]:
-			#flipy
-			ret = [row for row in ret[::-1]]
 
 		return ret
 
@@ -90,38 +86,26 @@ class tile:
 		self.edgescompliment = {"top":ced[0], "right":ced[1], "bottom":ced[2], "left":ced[3]}
 
 	def getedges(self):
-		if self.flipx:
-			return self.getflipxedges()
-		elif self.flipy:
-			return self.getflipyedges()
+		if self.flip:
+			return self.getflipedges()
 		else:
 			return self.edges
 	def getedgescompliment(self):
-		if self.flipx:
-			return self.getflipxedgescomp()
-		elif self.flipy:
-			return self.getflipyedgescomp()
+		if self.flip:
+			return self.getflipedgescomp()
 		else:
 			return self.edgescompliment
-	def getflipxedges(self):
+	def getflipedges(self):
 		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
 		return {"top":self.edgescompliment["top"], "right":self.edgescompliment["left"], "bottom":self.edgescompliment["bottom"], "left":self.edgescompliment["right"]}
-	def getflipyedges(self):
-		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
-		return {"top":self.edgescompliment["bottom"], "right":self.edgescompliment["right"], "bottom":self.edgescompliment["top"], "left":self.edgescompliment["left"]}
-	def getflipxedgescomp(self):
+	def getflipedgescomp(self):
 		#if flip x, we swap positions of l and r, and reverse everything to establish correct direction
 		return {"top":self.edges["top"], "right":self.edges["left"], "bottom":self.edges["bottom"], "left":self.edges["right"]}
-	def getflipyedgescomp(self):
-		#if flipping in y, we swap positions of top and bottom and reverse everything to establish correct direction
-		return {"top":self.edges["bottom"], "right":self.edges["right"], "bottom":self.edges["top"], "left":self.edges["left"]}
 
 	def getneighbors(self):
 		tempnei = self.neighbors
 		#{"top": None, "right": None, "bottom": None, "left": None}
-		if self.flipx:
-			tempnei = {"top": tempnei["top"], "right": tempnei["left"], "bottom": tempnei["bottom"], "left": tempnei["right"]}
-		elif self.flipy:
+		if self.flip:
 			tempnei = {"top": tempnei["top"], "right": tempnei["left"], "bottom": tempnei["bottom"], "left": tempnei["right"]}
 		tempnei	= self.rotate(tempnei, self.rotation)
 		return tempnei
@@ -183,7 +167,7 @@ class amap:
 
 
 	def printdebug(self):
-		debuginfo = [[(atile.num, atile.flipx, atile.flipy, atile.rotation) for atile in row] for row in self.map]
+		debuginfo = [[(atile.num, atile.flip, atile.rotation) for atile in row] for row in self.map]
 		for row in debuginfo:
 			print(row)
 	
@@ -257,6 +241,10 @@ class amap:
 	def rotatetile(self, knowngood, torotate):
 		#feed 2 connected tiles, second will be rotated to connect appropriately with the first
 		match = self.howmatch(knowngood, torotate)
+		if match[2]:
+			#if tile2 needs to be flipped
+			torotate.flip = True
+			match = self.howmatch(knowngood, torotate) ##howmatch respects the flip flag
 		sideref = {"top" : 0, "right" :1, "bottom" : 2, "left": 3}
 		goodsidenum = sideref[match[0]]
 		testsidenum = sideref[match[1]] + 2 % 4  #rotate the number indexes by 2 places
@@ -279,22 +267,13 @@ class amap:
 
 	def matchall(self):
 		temptilelist = []
-		isflip = {}
 		for tile in self.tiles:
 			neighbors = self.findmatch(tile)
 			for i in neighbors:
 				hm = self.howmatch(tile, i)
 				side = hm[0] #gives us which side of the current tile the match is for
 				otherside = hm[1]
-				if hm[2]: ##true if flipped
-					isflip[i] = otherside #store for now, add flipped flag when we come to it
 				tile.neighbors[side] = i
-
-			if tile in isflip:
-				if isflip[i] in ["left", "right"]:
-					tile.flipx = True
-				else:
-					tile.flipy = True
 
 
 			temptilelist.append(tile)
@@ -362,6 +341,8 @@ mymap.assemble()
 
 sea = str(mymap)
 
+mymap.printwithlines()
+mymap.printdebug()
 
 def seamonstersearch(sea):
 	sea = sea.split('\n')
@@ -380,21 +361,19 @@ def seamonstersearch(sea):
 
 	return monstercount
 
-def fliprotate(sea, *, rotate=False, flipx=False, flipy=False):
-	if not rotate and not flipx and not flipy:
+def fliprotate(sea, *, rotate=False, flip=False):
+	if not rotate and not flip:
 		return sea
 	sea = sea.split('\n')
 	if rotate:
 		ret = [''.join([row[col] for row in sea[::-1]]) for col in range(len(sea))]
-	elif flipx:
+	elif flip:
 		ret = [row[::-1] for row in sea]
-	elif flipy:
-		ret = [row for row in sea[::-1]]
 	return '\n'.join(ret)
 
 nummonsters = 0
 flipped = 0
-for _ in range(3):
+for _ in range(2):
 	for _ in range(3):
 		#rotate, check, repeat
 
@@ -406,12 +385,8 @@ for _ in range(3):
 	sea = fliprotate(sea, rotate=True) #flip back upright
 	if nummonsters == 0:
 		if flipped == 0:
-			sea = fliprotate(sea, flipx=True)
+			sea = fliprotate(sea, flip=True)
 			flipped += 1
-		elif flipped == 1:
-			sea = fliprotate(sea, flipx=True) #flip it back
-			sea = fliprotate(sea, flipy=True) #try y flip
-			flipped +=1
 		else:
 			break
 	else:
