@@ -1,5 +1,6 @@
 from math import floor, sqrt
 from copy import deepcopy
+import re
 
 class tile:
 	def __init__(self, rawdata):
@@ -355,16 +356,64 @@ def detransform(binnum):
 	return tmpnum
 
 
-print("numtiles: "+ str(mymap.numtiles))
-print("numedges:" + str(len(mymap.edges)))
-print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 == mymap.numtiles) else "no :(")
-
 tile1 = mymap.tiles[8]
 
-
-
 mymap.assemble()
-mymap.printwithlines()
-mymap.printdebug()
 
-print(mymap)
+sea = str(mymap)
+
+
+def seamonstersearch(sea):
+	sea = sea.split('\n')
+	monsterline1 = r"..................#."
+	monsterline2 = r"#....##....##....###"
+	monsterline3 = r".#..#..#..#..#..#..."
+	
+	monstercount = 0
+	for index, line in enumerate(sea):
+	
+		if index == 0:
+			continue  #skip the first line, since we are looking for the second monster line
+		if match := re.search(monsterline2, line):
+			if re.match(monsterline1, sea[index-1][match.start():]) and re.match(monsterline3, sea[index+1][match.start():]):
+				monstercount+= 1
+
+	return monstercount
+
+def fliprotate(sea, *, rotate=False, flipx=False, flipy=False):
+	if not rotate and not flipx and not flipy:
+		return sea
+	sea = sea.split('\n')
+	if rotate:
+		ret = [''.join([row[col] for row in sea[::-1]]) for col in range(len(sea))]
+	elif flipx:
+		ret = [row[::-1] for row in sea]
+	elif flipy:
+		ret = [row for row in sea[::-1]]
+	return '\n'.join(ret)
+
+nummonsters = 0
+flipped = 0
+for _ in range(3):
+	for _ in range(3):
+		#rotate, check, repeat
+
+		nummonsters = seamonstersearch(sea)
+		if nummonsters == 0:
+			sea = fliprotate(sea, rotate=True)
+		else:
+			break
+	sea = fliprotate(sea, rotate=True) #flip back upright
+	if nummonsters == 0:
+		if flipped == 0:
+			sea = fliprotate(sea, flipx=True)
+			flipped += 1
+		elif flipped == 1:
+			sea = fliprotate(sea, flipx=True) #flip it back
+			sea = fliprotate(sea, flipy=True) #try y flip
+			flipped +=1
+		else:
+			break
+	else:
+		break
+print(nummonsters)
