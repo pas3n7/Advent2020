@@ -27,12 +27,14 @@ class tile:
 		self.numneighbors = 0
 							
 	def __str__(self):
-		ret = self.getrotatedtile()
+		ret = self.getorientedtile()
 		return '\n'.join(ret)
 	
-	def getrotatedtile(self, degrees=None):
+	def getorientedtile(self, degrees=None, flip=False):
 		if not degrees:
 			degrees = self.rotation
+		if not flip:
+			flip = self.flipx, self.flipy
 		thistile = self.thetile
 		if degrees == 0:
 			ret = thistile
@@ -44,6 +46,13 @@ class tile:
 			ret = [[row[col] for row in thistile] for col in range(len(thistile)-1, 0-1, -1)]
 		else:
 			print("rotation failed")
+
+		if flip[0]:
+			#flipx
+			ret = [row[::-1] for row in ret]
+		elif flip[1]:
+			#flipy
+			ret = [row for row in ret[::-1]]
 
 		return ret
 
@@ -161,6 +170,11 @@ class amap:
 				lines.append(thisline)
 			
 		print( '\n'.join(lines))
+
+	def printdebug(self):
+		debuginfo = [[(atile.num, atile.flipx, atile.flipy, atile.rotation) for atile in row] for row in self.map]
+		for row in debuginfo:
+			print(row)
 	
 	def readindata(self, rawmapdata):
 		#rawmapdata should be provided as a string of tiles (format given in tile class) separated by a blank line
@@ -191,43 +205,6 @@ class amap:
 				thistile = t
 		return thistile
 
-
-
-	def findcorners(self):
-		#this is pointless now, but I'll remove it later
-		raise UserWarning("don't use findcorners")
-
-		#corners should be the tiles for which 2 edges have no match after checking all orientations
-		#per the prompt: but the outermost edges won't line up with any other tiles.
-		#this is not even remotely optimal, but let's just get it done
-
-		#flipping the tile reverses the order of the numbers
-		#Need to compare to compiment and non compliment because others might be flipped
-		#with tile to test, check compliment (which represents matches if it is not flipped), and non compliment (which represent maches if flipped)
-		#whichever has more matches should be correct.
-		#This approach might match more than one edge on our tile to another single tile, but let's hope not
-		
-		corners = []
-		for index, atile in enumerate(self.tiles):
-			matches = 0
-			allotheredges = self.alledges[:index*4] + self.alledges[(index*4)+4:] + self.alledgescomp[:index*4] + self.alledgescomp[(index*4)+4:]
-			matches = len([edge for edge in atile.getedgescompliment().values() if edge in allotheredges])
-			
-			if matches == 2:
-				self.tiles[index].iscorner = True
-				self.tiles[index].isedge = False
-				corners.append(atile.num)
-				self.corners.append(atile.num)
-			elif matches == 3:
-				self.tiles[index].isedge = True
-				self.tiles[index].iscorner = False
-				self.edges.append(atile.num)
-			elif matches < 2:
-				print("finding corners is probably broken for tile: " + str(atile.num))
-			elif matches > 4:
-				print(str(atile.num) + " is matching more than 4 edges")
-		# return self.corners
-		return False  #this function is pointless now. Will remove it later
 	
 	def findmatch(self, atile, side = None):
 		#just find the matching tile, don't care about orientation
@@ -328,19 +305,13 @@ class amap:
 		#we don't know which way they are rotated, so can't trust their neighbor direction, but can assemble in place
 		# based on the number of neighbors. the neighbor with the lowest num neighbors is the next one
 
-		def assemblecolrow(colaslist, length, side=None):
+		def assemblecolrow(colaslist, length, side):
 			#pass in a list with a corner as the only member, and a direction
 			#if given a side, just go that direction
-			if side:
+			if len(colaslist) < length:
 				toadd = self.rotatetile(colaslist[-1], colaslist[-1].getneighbors()[side]) #get next neighbor, rotate it
 				colaslist.append(toadd) #add the next one
-				colaslist = assemblecolrow(colaslist, length)
-			elif len(colaslist) < length:
-				neighbors = { side : tile for side, tile in colaslist[-1].getneighbors().items() if tile and tile not in colaslist}
-				nexttile = neighbors[min(neighbors, key= lambda n : neighbors[n].numneighbors)]
-				nexttile = self.rotatetile(colaslist[-1], nexttile)
-				colaslist.append(nexttile)
-				colaslist = assemblecolrow(colaslist, length)
+				colaslist = assemblecolrow(colaslist, length, side)
 			return colaslist
 
 
@@ -384,3 +355,4 @@ tile1 = mymap.tiles[8]
 
 mymap.assemble()
 mymap.printwithlines()
+mymap.printdebug()
