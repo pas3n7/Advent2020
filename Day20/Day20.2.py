@@ -27,7 +27,25 @@ class tile:
 		self.numneighbors = 0
 							
 	def __str__(self):
-		return '\n'.join(self.thetile)
+		ret = self.getrotatedtile()
+		return '\n'.join(ret)
+	
+	def getrotatedtile(self, degrees=None):
+		if not degrees:
+			degrees = self.rotation
+		thistile = self.thetile
+		if degrees == 0:
+			ret = thistile
+		elif degrees == 90:
+			ret = [[row[col] for row in thistile[::-1]] for col in range(len(thistile))]
+		elif degrees == 180:
+			ret = [row[::-1] for row in thistile[::-1]]
+		elif degrees == 270:
+			ret = [[row[col] for row in thistile] for col in range(len(thistile)-1, 0-1, -1)]
+		else:
+			print("rotation failed")
+
+		return ret
 
 	def _calcedges(self):
 		width, height = self.dim
@@ -247,10 +265,17 @@ class amap:
 		diff = goodsidenum - testsidenum
 		if diff < 0:
 			diff += 4
-		torotate.rotation = 360% (diff * 90)
+		torotate.rotation = (diff * 90) %360
 		return torotate
 
-
+	def settile(self, atile):
+		##for a tile which is passed in, if it exists in tiles array (as determined by tile number), replace it
+		for index, t in enumerate(self.tiles):
+			if t.num == atile.num:
+				self.tiles[index] = atile
+		else:
+			print("settile did not find a tile to replace")
+				
 
 	def matchall(self):
 		temptilelist = []
@@ -277,6 +302,7 @@ class amap:
 		self.tiles = temptilelist
 
 	def assemble(self):
+		self.matchall()
 		corners = [tile for tile in self.tiles if tile.numneighbors == 2]
 		topleft = None #keep in mind the whole thing could be flipped or rotated
 		for i in corners:
@@ -294,14 +320,15 @@ class amap:
 			#pass in a list with a corner as the only member, and a direction
 			#if given a side, just go that direction
 			if side:
-				colaslist.append(colaslist[-1].getneighbors()[side]) #add the next one
+				toadd = self.rotatetile(colaslist[-1], colaslist[-1].getneighbors()[side]) #get next neighbor, rotate it
+				colaslist.append(toadd) #add the next one
 				colaslist = assemblecolrow(colaslist, length)
 			elif len(colaslist) < length:
 				neighbors = { side : tile for side, tile in colaslist[-1].getneighbors().items() if tile and tile not in colaslist}
 				nexttile = neighbors[min(neighbors, key= lambda n : neighbors[n].numneighbors)]
+				nexttile = self.rotatetile(colaslist[-1], nexttile)
 				colaslist.append(nexttile)
 				colaslist = assemblecolrow(colaslist, length)
-
 			return colaslist
 
 
@@ -335,11 +362,7 @@ print("numedges matches numtiles?: " + "Yes!" if (((len(mymap.edges)/4) + 2)**2 
 
 tile1 = mymap.tiles[8]
 
-mymap.matchall()
 
-for tile in mymap.tiles:
-	print(tile.num)
-	print(tile.flipx, tile.flipy)
 
 mymap.assemble()
 print(mymap)
