@@ -1,5 +1,5 @@
-fn = r'.\Day22\testinput.txt'
-#fn = r'.\Day22\input.txt'
+#fn = r'.\Day22\testinput.txt'
+fn = r'.\Day22\input.txt'
 
 
 with open(fn) as thefile:
@@ -32,25 +32,29 @@ def game(p1deck, p2deck, gamedepth=0):
 			gameover = True
 		else:
 			p1card, p2card= p1deck.pop(0), p2deck.pop(0)
-		print(gamestate(p1card, p2card, p1deck, p2deck, gameround, gamedepth))
-		if gameover == False and len(p1deck) >= p1card and len(p2deck) >= p2card:
-			print("Playing a subgame to determine round winner")
-			subwinner, _ = game(p1deck[:p1card], p2deck[:p2card], gamedepth+1)  #don't need the deck of the winner
-			if subwinner == 1:
+		# print(gamestate(p1card, p2card, p1deck, p2deck, gameround, gamedepth))
+		#print("game: " + str(gamedepth) + "   round: " + str(gameround) + " size of history: " + str(len(gamehistory)), end="\r")
+		if not gameover:
+			if len(p1deck) >= p1card and len(p2deck) >= p2card:
+				#print("Playing a subgame to determine round winner")
+				subwinner, _ = game(p1deck[:p1card], p2deck[:p2card], gamedepth+1)  #don't need the deck of the winner
+				if subwinner == 1:
+					p1wins = True
+				else:
+					p2wins = True
+			elif p1card > p2card:
 				p1wins = True
 			else:
 				p2wins = True
-		elif p1card > p2card:
-			p1wins = True
-		else:
-			p2wins = True
 		
-		if gameover == False and p1wins:
-			p1deck.extend((p1card, p2card))
-			print("Player1 Wins!")
-		elif gameover == False and p2wins:
-			p2deck.extend((p2card, p1card))
-			print("Player2 Wins!")
+			if p1wins:
+				p1deck.extend((p1card, p2card))
+				#print("Player1 Wins!")
+			elif p2wins:
+				p2deck.extend((p2card, p1card))
+				#print("Player2 Wins!")
+			else:
+				print("Oh no, nobody won")
 		gamehistory.append(startinghash)
 		gameround += 1
 
@@ -59,11 +63,11 @@ def game(p1deck, p2deck, gamedepth=0):
 		#only way we set gameover true is if something matched in the game history, p1 wins
 		winner = 1
 		winnerdeck = p1deck
-		print("Player 1 wins game " + str(gamedepth))
+		#print("Player 1 wins game " + str(gamedepth))
 	else:
 		winner = 2
 		winnerdeck = p2deck
-		print("Player 2 wins game " + str(gamedepth))
+		#print("Player 2 wins game " + str(gamedepth))
 
 	return winner, winnerdeck
 
