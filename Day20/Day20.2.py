@@ -379,6 +379,8 @@ def fliprotate(sea, *, rotate=False, flip=False):
 		ret = [''.join([row[col] for row in sea[::-1]]) for col in range(len(sea))]
 	elif flip:
 		ret = [row[::-1] for row in sea]
+	else:
+		ret = None
 	return '\n'.join(ret)
 
 nummonsters = 0
