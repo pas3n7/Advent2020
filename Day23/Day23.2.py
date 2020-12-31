@@ -1,4 +1,4 @@
-from collections import deque
+import time
 
 testinput = False
 
@@ -8,37 +8,64 @@ if not testinput:
 else: 
 	#test input
 	input = "389125467"
-input = deque([int(i) for i in input])
+input = [int(i) for i in input]
 
 ###idk, let's just try brute forcing it
 mil = 1000000
-numtoextendto = 1000
-nummoves = 10*numtoextendto
-input.extend(range(max(input), numtoextendto + 1))
+numtoextendto = 40
+nummoves = 10
 
 def move(cups, nummoves):
-	for _ in range(nummoves):
-		stack = deque()
-		cups.rotate(-1)
-		nexttarget = input[-1] -1
+	def numgen(direction):
+		numr = len(cups) + 1
+		numl = numtoextendto
+		while True and numl > numr and numl > 0 and numr < numtoextendto:
+			if direction == 1:
+				yield numr
+				numr += 1
+			if direction == -1:
+				yield numl
+				numl -= 1
+		else:
+			yield None
+	cups.extend(range(len(cups)+1, numtoextendto+1))
+	move = 0
+	selectedindex = 0
+	while move < nummoves:
+		print(cups, end='\n')
+		time.sleep(.25)
+		stack = []
+		target = cups[selectedindex] -1 
+		tomoveindex = selectedindex
 		for _ in range(3):
-			stack.append(cups.popleft())
-		while nexttarget == 0 or nexttarget in stack:
-			nexttarget = nexttarget - 1
-			if nexttarget == -1:
-				nexttarget = numtoextendto
-		#print("destination", nexttarget, end='\r')
-		nexttarget = cups.index(nexttarget)
-		#rotate, extend, rotate back
-		cups.rotate(-(nexttarget+1))
-		cups.extend(stack)
-		cups.rotate(nexttarget+4)
+			tomoveindex = tomoveindex % numtoextendto
+			stack.append(cups.pop(tomoveindex))
+		while target in stack or target == 0:
+			if target == 0:
+				target = numtoextendto
+			target = target - 1
+		#print("destination", target, end='\r')
+		target = cups.index(target)
+
+		for i in stack:
+			cups.insert(target+1, i) #insert to the right of target
+
+		#iterate, move over by 4 if we put the 3 new ones to the right
+		if target < selectedindex:
+			selectedindex = (selectedindex+4) % numtoextendto
+		else:
+			selectedindex = (selectedindex+1) % numtoextendto
+		move+= 1
 
 
 
-import cProfile
-import re
-cProfile.run('re.compile("foo|bar")')
+		
+
+
+
+# import cProfile
+# import re
+# cProfile.run('move(input, nummoves)')
 
 move(input, nummoves)
 
