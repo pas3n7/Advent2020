@@ -1,6 +1,6 @@
 import time
 
-testinput = False
+testinput = True
 
 if not testinput:
 	#real input
@@ -12,7 +12,7 @@ input = [int(i) for i in input]
 
 ###idk, let's just try brute forcing it
 mil = 1000000
-numtoextendto = 40
+numtoextendto = 9
 nummoves = 10
 
 def move(cups, nummoves):
@@ -36,22 +36,23 @@ def move(cups, nummoves):
 		time.sleep(.25)
 		stack = []
 		target = cups[selectedindex] -1 
-		tomoveindex = selectedindex
-		for _ in range(3):
-			tomoveindex = tomoveindex % numtoextendto
-			stack.append(cups.pop(tomoveindex))
+		tomoveindex = selectedindex + 1
+		for i in range(3):
+			tomoveindex = tomoveindex % (numtoextendto - i)
+			stack.insert(0, (cups.pop(tomoveindex)))
 		while target in stack or target == 0:
 			if target == 0:
 				target = numtoextendto
 			target = target - 1
-		#print("destination", target, end='\r')
-		target = cups.index(target)
+
+		targetindex = cups.index(target) % (numtoextendto - 2 )
 
 		for i in stack:
-			cups.insert(target+1, i) #insert to the right of target
-
+			cups.insert(targetindex+1, i) #insert to the right of target
+		print("selected", cups[selectedindex], "destination", target, "dest index", targetindex, "stack", list(reversed(stack)))
 		#iterate, move over by 4 if we put the 3 new ones to the right
-		if target < selectedindex:
+		print(selectedindex)
+		if targetindex < selectedindex:
 			selectedindex = (selectedindex+4) % numtoextendto
 		else:
 			selectedindex = (selectedindex+1) % numtoextendto
