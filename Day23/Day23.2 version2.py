@@ -147,7 +147,7 @@ crabbycups = cupcircle(input, numtoextendto)
 # import re
 # cProfile.run('crabbycups.move(10000)')
 
-crabbycups.move(10000)
+crabbycups.move(100000)
 
 # crabbycups.move(10000)
 
