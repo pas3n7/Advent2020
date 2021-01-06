@@ -19,10 +19,10 @@ class cupcircle:
 		#Actually, idk if we need this
 		pass
 
-	def updatememory(self, firstcupindex=None, lastcupindex=None):
+	def updatememory(self):
 		#if given, only update everything from firstcupindex to lastcupindex
-		if lastcupindex != 0:
-			tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1])}
+		if self.needtoupdate[1] != 0:
+			tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1], self.needtoupdate[0])}
 			self.cupindexmemory.update(tmpdict)
 		self.needtoupdate = (0, 0)
 
@@ -38,48 +38,69 @@ class cupcircle:
 		tmpstack = []
 		updatedindexes = []
 		indtopop = self.currentcupind + 1
-		for _ in range(3):
+		indtoappend = indtopop
+		for i in range(3):
 			if indtopop >= len(self.thecups): #len is changing as we pop
 				indtopop = 0
 			tmpstack.append(self.thecups.pop(indtopop))
-			updatedindexes.append(indtopop)
+			updatedindexes.append((indtoappend + i) % self.numcups)
 		return tmpstack, updatedindexes
 
 	def insertcups(self, cupstack, index):
-		for cup in cupstack:
+		for cup in cupstack[::-1]:
 			self.thecups.insert(index, cup)
 
-	def move(self):
-		updatedindexes = [] #keep track of what's been moved around
-		tmpstack = []
-		##pick up cups to the right of the currently selected cup:
-		tmpstack, updatedindexes = self.pickupcups()
-
-		#find the target, can't be in the tmpstack, can't be 0 (there is no cup number 0)
-		target = self.thecups[self.currentcupind] -1
-		while target == 0 or target in tmpstack:
-			target = (target -1 ) % (self.numcups + 1) #need the +1, because need -1% () to come out to be numcups
-		##at this point, everything to the right of min(updatedindexes) (to take into account wrapping) is at index -3 of where 
-		#cupindexmemory thinks it 
-	
-
-		targetindexunadjusted = self.cupindexmemory[target]
-		#don't need to worry about cases where we wrapped(everything is off) or pulled the last 3 (nothing is off)
-		if targetindexunadjusted >= min(updatedindexes): 
-			targetindex = targetindexunadjusted + 3
-		else:
-			targetindex = targetindexunadjusted
-
-		self.insertcups(tmpstack, targetindex+1) #insert to the right of the target
-		updatedindexes.extend(range(targetindex, targetindex+3))  ##add the targetindex to the indexes we have changed
-
-		#No, need to update anything between the lowest index we've modified (anything lower wasn't moved)
-		# and the highest index we've modified (anything to the right of that got moved back when we inserted)
-		self.needtoupdate = (min(updatedindexes), max(updatedindexes))
-		self.updatememory()
+	def move(self, nummoves=1):
+		print("starting")
+		print(self.thecups)
+		print(self.cupindexmemory)
+		print("memcheck passed: ", self.memcheck())
+		for _ in range(nummoves):
+			updatedindexes = [] #keep track of what's been moved around
+			tmpstack = []
+			currentcupval = self.thecups[self.currentcupind]
+			##pick up cups to the right of the currently selected cup:
+			tmpstack, updatedindexes = self.pickupcups()
+			print("picked up: ", tmpstack)
+			#find the target, can't be in the tmpstack, can't be 0 (there is no cup number 0)
+			target = currentcupval -1
+			while target == 0 or target in tmpstack:
+				target = (target -1 ) % (self.numcups + 1) #need the +1, because need -1% () to come out to be numcups
+			##at this point, everything to the right of min(updatedindexes) (to take into account wrapping) is at index -3 of where 
+			#cupindexmemory thinks it 
 		
 
+			targetindexunadjusted = self.cupindexmemory[target]
+			#don't need to worry about cases where we wrapped(everything is off) or pulled the last 3 (nothing is off)
+			if targetindexunadjusted >= min(updatedindexes): 
+				targetindex = targetindexunadjusted - 3
+			else:
+				targetindex = targetindexunadjusted
 
+			self.insertcups(tmpstack, targetindex+1) #insert to the right of the target
+			updatedindexes.extend(range(targetindex, targetindex+4))  ##add the targetindex to the indexes we have changed
+
+			#No, need to update anything between the lowest index we've modified (anything lower wasn't moved)
+			# and the highest index we've modified (anything to the right of that got moved back when we inserted)
+			self.needtoupdate = (min(updatedindexes), max(updatedindexes))
+			self.updatememory()
+			#current cup may have moved
+			self.currentcupind = self.cupindexmemory[currentcupval]
+
+			self.movetonextcup()
+
+			print(_)
+			print(self.thecups)
+			print(self.cupindexmemory)
+			print("memcheck passed: ", self.memcheck())
+
+
+
+	def memcheck(self):
+		for index, cup in enumerate(self.thecups):
+			if self.cupindexmemory[cup] != index:
+				return False
+		return True
 
 
 
@@ -100,52 +121,9 @@ else:
 
 crabbycups = cupcircle(input)
 
-print(crabbycups.thecups)
-print(crabbycups.cupindexmemory)
-
-crabbycups.move()
-
-print(crabbycups.thecups)
-print(crabbycups.cupindexmemory)
+crabbycups.move(10)
 
 
 
-
-
-# ###idk, let's just try brute forcing it
-# mil = 1000000
-# numtoextendto = 9
-# nummoves = 100# 10 * numtoextendto
-# input.extend(range(max(input) + 1, numtoextendto + 1))
-
-# def move(cups, nummoves):
-# 	for _ in range(nummoves):
-# 		stack = deque()
-# 		cups.rotate(-1)
-# 		nexttarget = input[-1] -1
-# 		for _ in range(3):
-# 			stack.append(cups.popleft())
-# 		while nexttarget == 0 or nexttarget in stack:
-# 			nexttarget = nexttarget - 1
-# 			if nexttarget == -1:
-# 				nexttarget = numtoextendto
-# 		#print("destination", nexttarget, end='\r')
-# 		nexttarget = cups.index(nexttarget)
-# 		#rotate, extend, rotate back
-# 		cups.rotate(-(nexttarget+1))
-# 		cups.extend(stack)
-# 		cups.rotate(nexttarget+4)
-		
-
-
-# move(input, nummoves)
-
-
-# print('\n')
-
-# def solforp2(cups):
-# 	oneindex = cups.index(1)
-# 	nums = cups[(oneindex+1)%numtoextendto] , cups[(oneindex+2)%numtoextendto]
-# 	return nums
-
-# print(solforp2(input))
+# print(crabbycups.thecups)
+# print(crabbycups.cupindexmemory)
