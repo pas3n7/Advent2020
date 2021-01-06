@@ -119,11 +119,11 @@ else:
 	input = "389125467"
 
 
-crabbycups = cupcircle(input, 10)
+crabbycups = cupcircle(input, 10000)
 
-crabbycups.move(100)
+crabbycups.move(10000)
 
-print(crabbycups.thecups)
+#print(crabbycups.thecups)
 
 
 
