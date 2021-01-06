@@ -71,11 +71,11 @@ class cupcircle:
 		
 
 			targetindexunadjusted = self.cupindexmemory[target]
-			#don't need to worry about cases where we wrapped(everything is off) or pulled the last 3 (nothing is off)
-			if targetindexunadjusted >= min(updatedindexes): 
-				targetindex = targetindexunadjusted - 3
-			else:
-				targetindex = targetindexunadjusted
+			
+			#find how many items have been removed left of the target
+			numpoppedleftoftarget = len([x for x in updatedindexes if x < targetindexunadjusted])
+
+			targetindex = targetindexunadjusted - numpoppedleftoftarget
 
 			self.insertcups(tmpstack, targetindex+1) #insert to the right of the target
 			updatedindexes.extend(range(targetindex, targetindex+4))  ##add the targetindex to the indexes we have changed
