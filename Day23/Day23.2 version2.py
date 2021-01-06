@@ -51,17 +51,17 @@ class cupcircle:
 			self.thecups.insert(index, cup)
 
 	def move(self, nummoves=1):
-		print("starting")
-		print(self.thecups)
-		print(self.cupindexmemory)
-		print("memcheck passed: ", self.memcheck())
+		# print("starting")
+		# print(self.thecups)
+		# print(self.cupindexmemory)
+		# print("memcheck passed: ", self.memcheck())
 		for _ in range(nummoves):
 			updatedindexes = [] #keep track of what's been moved around
 			tmpstack = []
 			currentcupval = self.thecups[self.currentcupind]
 			##pick up cups to the right of the currently selected cup:
 			tmpstack, updatedindexes = self.pickupcups()
-			print("picked up: ", tmpstack)
+			#print("picked up: ", tmpstack)
 			#find the target, can't be in the tmpstack, can't be 0 (there is no cup number 0)
 			target = currentcupval -1
 			while target == 0 or target in tmpstack:
@@ -89,10 +89,10 @@ class cupcircle:
 
 			self.movetonextcup()
 
-			print(_)
-			print(self.thecups)
-			print(self.cupindexmemory)
-			print("memcheck passed: ", self.memcheck())
+			# print(_)
+			# print(self.thecups)
+			# print(self.cupindexmemory)
+			# print("memcheck passed: ", self.memcheck())
 
 
 
@@ -119,9 +119,11 @@ else:
 	input = "389125467"
 
 
-crabbycups = cupcircle(input)
+crabbycups = cupcircle(input, 10)
 
-crabbycups.move(10)
+crabbycups.move(100)
+
+print(crabbycups.thecups)
 
 
 
