@@ -1,12 +1,12 @@
 class cupcircle:
 	def __init__(self, cupinit, numtotal=0):
 		self.thecups = []
-		self.cupindexmemory = dict()
 		self.currentcupind = 0  ###the index, not the cup num
 		self.numcups = max(len(cupinit), numtotal) #note that because numbers start a 1 and not 0, this is also the highest cupnum
 		self.needtoupdate = (0, self.numcups-1) #given in terms of the index
 		self.updatelast5 = [0, 0, 0, 0, 0]
 		self.movenum = 0
+		self.cupindexmemory = [0 for _ in range(self.numcups+1)]
 
 		tempcups = [int(i) for i in input]
 		self.thecups = tempcups + list(range(max(tempcups) + 1, numtotal + 1))
