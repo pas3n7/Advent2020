@@ -5,26 +5,46 @@ class cupcircle:
 		self.currentcupind = 0  ###the index, not the cup num
 		self.numcups = max(len(cupinit), numtotal) #note that because numbers start a 1 and not 0, this is also the highest cupnum
 		self.needtoupdate = (0, self.numcups-1) #given in terms of the index
+		self.updatelast5 = [0, 0, 0, 0, 0]
+		self.movenum = 0
 
 		tempcups = [int(i) for i in input]
 		self.thecups = tempcups + list(range(max(tempcups) + 1, numtotal + 1))
 
 		##init the dictionary index
 		self.updatememory()
-	
-	def updateneedtoupdate(self, updatedtuple):
-		##this function is to be called when a function updates thecups
-		##updatedtuple should be a tuple of the lowest index modified, and the highest index modified
 
-		#Actually, idk if we need this
-		pass
+		## initial rotation to avoid some of the initial stuff where it updates either side of the list over and over
+		self.rotate(self.numcups//2)
+
+	def rotate(self, num):
+		self.thecups = self.thecups[num:] + self.thecups[:num]
+		self.currentcupind = (self.currentcupind + num + 1) % self.numcups
+		self.updateallmem()
 
 	def updatememory(self):
 		#if given, only update everything from firstcupindex to lastcupindex
-		if self.needtoupdate[1] != 0:
-			tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1], self.needtoupdate[0])}
-			self.cupindexmemory.update(tmpdict)
+		# if self.movenum % 100 == 0:
+		needtoupdate = self.needtoupdate
+		# updatenum = needtoupdate[1]-needtoupdate[0]
+		# # print("updating: ", updatenum, end="\r")
+		# self.updatelast5.pop(0)
+		# self.updatelast5.append(updatenum)
+		# if sum(self.updatelast5)/5 > self.numcups/2:
+		# 	self.rotate(self.numcups//4)
+
+		if needtoupdate[1] != 0:
+			# tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1], self.needtoupdate[0])}
+			# self.cupindexmemory.update(tmpdict)
+			for index, cup in enumerate(self.thecups[needtoupdate[0]:needtoupdate[1]+1], needtoupdate[0]):
+				self.cupindexmemory[cup] = index
 		self.needtoupdate = (0, 0)
+
+	def updateallmem(self):
+		self.needtoupdate = (0, self.numcups-1) #given in terms of the index
+		for index, cup in enumerate(self.thecups):
+			self.cupindexmemory[cup] = index
+
 
 	def movetonextcup(self):
 		if self.currentcupind < self.numcups -1:
@@ -88,6 +108,7 @@ class cupcircle:
 			self.currentcupind = self.cupindexmemory[currentcupval]
 
 			self.movetonextcup()
+			self.movenum += 1
 
 			# print(_)
 			# print(self.thecups)
@@ -118,14 +139,31 @@ else:
 	#test input
 	input = "389125467"
 
+numtoextendto = 1000000
 
-crabbycups = cupcircle(input, 10000)
+crabbycups = cupcircle(input, numtoextendto)
+
+# import cProfile
+# import re
+# cProfile.run('crabbycups.move(10000)')
 
 crabbycups.move(10000)
 
-#print(crabbycups.thecups)
+# crabbycups.move(10000)
+
+
+# crabbycups = cupcircle(input)
+# crabbycups.move(10)
+# print(crabbycups.thecups)
 
 
 
 # print(crabbycups.thecups)
 # print(crabbycups.cupindexmemory)
+
+def solforp2(cups):
+	oneindex = cups.index(1)
+	nums = cups[(oneindex+1)%numtoextendto] , cups[(oneindex+2)%numtoextendto]
+	return nums
+
+print(solforp2(crabbycups.thecups))
