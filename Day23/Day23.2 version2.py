@@ -12,8 +12,8 @@ input = deque([int(i) for i in input])
 
 ###idk, let's just try brute forcing it
 mil = 1000000
-numtoextendto = 9
-nummoves = 100# 10 * numtoextendto
+numtoextendto = 10000
+nummoves = 100000# 10 * numtoextendto
 input.extend(range(max(input) + 1, numtoextendto + 1))
 
 def move(cups, nummoves):
