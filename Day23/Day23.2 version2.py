@@ -33,11 +33,15 @@ class cupcircle:
 		# if sum(self.updatelast5)/5 > self.numcups/2:
 		# 	self.rotate(self.numcups//4)
 
-		if needtoupdate[1] != 0:
-			# tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1], self.needtoupdate[0])}
-			# self.cupindexmemory.update(tmpdict)
-			for index, cup in enumerate(self.thecups[needtoupdate[0]:needtoupdate[1]+1], needtoupdate[0]):
-				self.cupindexmemory[cup] = index
+		# if needtoupdate[1] != 0:
+		# tmpdict = {cupnum:index for index, cupnum in enumerate(self.thecups[self.needtoupdate[0]:self.needtoupdate[1]+1], self.needtoupdate[0])}
+		# self.cupindexmemory.update(tmpdict)
+		# for index, cup in enumerate(self.thecups[needtoupdate[0]:needtoupdate[1]+1], needtoupdate[0]):
+		# 	self.cupindexmemory[cup] = index
+		index = needtoupdate[0]
+		while index <= needtoupdate[1]: #<= because we need to change the needtoupdate[1]
+			self.cupindexmemory[self.thecups[index]] = index
+			index +=1
 		self.needtoupdate = (0, 0)
 
 	def updateallmem(self):
@@ -147,7 +151,7 @@ crabbycups = cupcircle(input, numtoextendto)
 # import re
 # cProfile.run('crabbycups.move(10000)')
 
-crabbycups.move(100000)
+crabbycups.move(10000)
 
 # crabbycups.move(10000)
 
