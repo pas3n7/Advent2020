@@ -17,8 +17,8 @@ else:
 
 ####
 #Constants
-NUMTOEXTENDTO = 9
-NUMMOVES = 100
+NUMTOEXTENDTO = 1_000_000
+NUMMOVES = 10_000
 
 
 ###### class def
@@ -47,10 +47,11 @@ def readinput(cupinput):
 def extend(listofcups, numtoextendto, firstcupnum, lastcupnum):
 	extendfrom = max(listofcups[1:], key=lambda x: x.cupnum).cupnum
 	# listofcups = listofcups + [cup()]
-	listofcups[lastcupnum].nextcup = extendfrom + 1
-	extension = [cup(index, index+1) for index in range(extendfrom+1, numtoextendto)]
-	extension.append(cup(20, firstcupnum))
-	listofcups.extend(extension)
+	if numtoextendto > extendfrom:
+		listofcups[lastcupnum].nextcup = extendfrom + 1
+		extension = [cup(index, index+1) for index in range(extendfrom+1, numtoextendto)]
+		extension.append(cup(numtoextendto, firstcupnum))
+		listofcups.extend(extension)
 
 
 def reassemble(listofcups):
@@ -96,22 +97,13 @@ currentcup, thecups = readinput(INPUT)
 #### thecups[0] is just the number 0
 #### because there is no cup with number 0
 
-
+extend(thecups, NUMTOEXTENDTO, INPUT[0], INPUT[-1])
 
 # print(reassemble(thecups))
 
-# for _ in range(NUMMOVES):
-# 	move(currentcup, thecups)
-# 	currentcup = thecups[currentcup].nextcup
+for _ in range(NUMMOVES):
+	move(currentcup, thecups)
+	currentcup = thecups[currentcup].nextcup
 
-# print(calcscorep2(thecups))
+print(calcscorep2(thecups))
 
-
-####TESTNG
-
-extend(thecups, 20, INPUT[0], INPUT[-1])
-
-print(reassemble(thecups))
-
-for i in thecups:
-	print(i)
