@@ -3,7 +3,7 @@
 
 
 ## input ##
-TESTINPUT = True
+TESTINPUT = False
 
 if not TESTINPUT:
 	#real input
@@ -18,7 +18,7 @@ else:
 ####
 #Constants
 NUMTOEXTENDTO = 1_000_000
-NUMMOVES = 10_000
+NUMMOVES = 10_000_000
 
 
 ###### class def
@@ -100,6 +100,8 @@ currentcup, thecups = readinput(INPUT)
 extend(thecups, NUMTOEXTENDTO, INPUT[0], INPUT[-1])
 
 # print(reassemble(thecups))
+import time
+time1 = time.time()
 
 for _ in range(NUMMOVES):
 	move(currentcup, thecups)
@@ -107,3 +109,5 @@ for _ in range(NUMMOVES):
 
 print(calcscorep2(thecups))
 
+
+print(time.time() - time1)
