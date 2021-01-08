@@ -19,7 +19,7 @@
 from collections import Counter
 from copy import deepcopy
 
-fn = r'.\Day24\testinput.txt'
+fn = r'.\Day24\input.txt'
 
 directions = []
 with open(fn) as thefile:
@@ -115,7 +115,7 @@ yoffset = abs(farthesty[0])
 if yoffset % 2 == 1: 
 	yoffset+=1  #maintain evenness in the y
 
-yoffset-=1  #errrrrr, this is needed, for reasons that are too complicated to explain this late at night
+yoffset+=1  #errrrrr, this is needed, for reasons that are too complicated to explain this late at night
 
 initblacktiles = [(x+xoffset, y+yoffset) for x, y in initblacktiles]
 
