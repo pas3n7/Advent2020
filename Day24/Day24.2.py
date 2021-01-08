@@ -17,6 +17,7 @@
 ### let's read in the input 
 
 from collections import Counter
+from copy import deepcopy
 
 fn = r'.\Day24\testinput.txt'
 
@@ -110,7 +111,11 @@ farthesty = min(farthesty), max(farthesty)
 
 ## Make everything positive
 xoffset = abs(farthestx[0])
-yoffset = abs(farthesty[0])
+yoffset = abs(farthesty[0]) 
+if yoffset % 2 == 1: 
+	yoffset+=1  #maintain evenness in the y
+
+yoffset-=1  #errrrrr, this is needed, for reasons that are too complicated to explain this late at night
 
 initblacktiles = [(x+xoffset, y+yoffset) for x, y in initblacktiles]
 
@@ -176,7 +181,7 @@ class afloor:
 
 
 	def move(self):
-		floorcopy = self.thefloor.copy()
+		floorcopy = deepcopy(self.thefloor)
 		expandx = False
 		expandy = False
 		for y in range(1, self.ydim-1):
@@ -201,21 +206,40 @@ class afloor:
 		if expandy:
 			self.expandy()
 
-		
+	def getnumb(self):
+		blacktiles = 0
+		for y in self.thefloor:
+			for tile in y:
+				if tile == "b":
+					blacktiles += 1
+		return blacktiles
 
 
 
+
+
+def visneighbors(afloor):
+	myfloor = deepcopy(afloor.thefloor)
+	for y, row in enumerate(myfloor):
+		for x, tile in enumerate(row):
+			if tile == "b":
+				myfloor[y][x]= str(afloor.getbneighbors(x, y))
+			# if x == 0:
+			# 	myfloor[y][x]= str(0)
+
+	for index, row in enumerate(myfloor[::-1]):
+		if index % 2 == 0:
+			#even row or odd row if backwards
+			print(" ", row)
+		else:
+			print(row)
 
 
 thefloor = afloor(initblacktiles, startdim)
 
+for i in range(100):
+	thefloor.move()
+	if (i+1) % 10 == 0:
+		print(i+1, thefloor.getnumb())
 
-for row in thefloor.thefloor:
-	print(row)
-
-thefloor.move()
-
-print("\n")
-
-for row in thefloor.thefloor:
-	print(row)
+# print(thefloor.getnumb())
