@@ -4,16 +4,15 @@ SUBJECTNUM = 7
 DIVISOR = 20201227
 
 TESTPUBKEYS = 5764801, 17807724
+PUZPUBKEYS = 10705932, 12301431
 
-
-PUBKEYS = TESTPUBKEYS
+PUBKEYS = PUZPUBKEYS
 
 
 currentkey = 1
 loopnum = 1
-while loopnum < 100:  ##just stop infinite loops
+while loopnum < 100_000_000:  ##just stop infinite loops
 	currentkey = (currentkey * SUBJECTNUM) % DIVISOR
-	print(currentkey)
 	if currentkey in PUBKEYS:
 		print("Reached the public key: ", currentkey, " with loop #", loopnum)
 		break
@@ -21,11 +20,10 @@ while loopnum < 100:  ##just stop infinite loops
 
 otherpubkey = [key for key in PUBKEYS if key != currentkey][0]
 
-print(otherpubkey)
+print("Other public key: ", otherpubkey)
 
-privkey = 1
+encrkey = 1
 for loop in range(loopnum):
-	privkey = (privkey * otherpubkey) % DIVISOR
-	print(loop)
+	encrkey = (encrkey * otherpubkey) % DIVISOR
 
-print(privkey)
+print("Private Key: ", encrkey)
